@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35707.178 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BarberFlow.Api", "BarberFlow.Api\BarberFlow.Api.csproj", "{60666C9D-4B99-45F1-B4FF-49502535F52D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BarberFlow.Application", "BarberFlow.Application\BarberFlow.Application.csproj", "{242786D8-7D55-44C6-B4A1-51E60949DEB3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BarberFlow.Domain", "BarberFlow.Domain\BarberFlow.Domain.csproj", "{2B17F5D3-980E-481B-AF4F-A93335249FEB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BarberFlow.Infrastructure", "BarberFlow.Infrastructure\BarberFlow.Infrastructure.csproj", "{68E7CF61-E755-4A34-8D5E-E2B5B588CCCD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{60666C9D-4B99-45F1-B4FF-49502535F52D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60666C9D-4B99-45F1-B4FF-49502535F52D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60666C9D-4B99-45F1-B4FF-49502535F52D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60666C9D-4B99-45F1-B4FF-49502535F52D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{242786D8-7D55-44C6-B4A1-51E60949DEB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{242786D8-7D55-44C6-B4A1-51E60949DEB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{242786D8-7D55-44C6-B4A1-51E60949DEB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{242786D8-7D55-44C6-B4A1-51E60949DEB3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B17F5D3-980E-481B-AF4F-A93335249FEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B17F5D3-980E-481B-AF4F-A93335249FEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B17F5D3-980E-481B-AF4F-A93335249FEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B17F5D3-980E-481B-AF4F-A93335249FEB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68E7CF61-E755-4A34-8D5E-E2B5B588CCCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68E7CF61-E755-4A34-8D5E-E2B5B588CCCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68E7CF61-E755-4A34-8D5E-E2B5B588CCCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68E7CF61-E755-4A34-8D5E-E2B5B588CCCD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
