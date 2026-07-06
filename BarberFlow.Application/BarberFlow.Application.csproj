@@ -7,7 +7,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Features\Auth\DTOs\LoginProfileDto.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\BarberFlow.Domain\BarberFlow.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Features\Appointments\Queries\" />
+    <Folder Include="Features\Auth\Commands\SwitchProfile\" />
+    <Folder Include="Features\Auth\Queries\GetUserProfiles\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="14.1.0" />
   </ItemGroup>
 
 </Project>
