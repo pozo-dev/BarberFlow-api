@@ -36,6 +36,7 @@ namespace BarberFlow.Application.Features.Auth.Queries.LoginContext
                 return new LoginContextResponseDto
                 {
                     IsNewUser = true,
+                    UserId = Guid.Empty,
                     Profiles = new List<LoginContextProfileDto>()
                 };
             }
@@ -45,7 +46,7 @@ namespace BarberFlow.Application.Features.Auth.Queries.LoginContext
             return new LoginContextResponseDto
             {
                 IsNewUser = false,
-
+                UserId = user.Id,
                 Profiles = profiles
                     .Select(x => new LoginContextProfileDto
                     {

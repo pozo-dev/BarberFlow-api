@@ -2,11 +2,8 @@
 {
     public class LoginContextResponseDto
     {
-        //public bool UserExists { get; set; }
-
-        //public bool RequiresProfileSelection { get; set; }
-
         public bool IsNewUser { get; set; }
+        public Guid UserId { get; set; }
         public IReadOnlyCollection<LoginContextProfileDto> Profiles { get; set; } = [];
     }
 }

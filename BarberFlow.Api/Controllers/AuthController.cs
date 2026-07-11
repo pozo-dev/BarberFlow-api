@@ -5,7 +5,6 @@ using BarberFlow.Application.Features.Auth.Commands.VerifyOtp;
 using BarberFlow.Application.Features.Auth.DTOs;
 using BarberFlow.Application.Features.Auth.Queries.LoginContext;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 

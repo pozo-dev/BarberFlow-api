@@ -4,7 +4,7 @@ namespace BarberFlow.Application.Features.UserProfiles.RegisterUserProfile
 {
     public class RegisterUserProfileCommand : IRequest<RegisterUserProfileResponseDto>
     {
-        public string PhoneNumber { get; set; } = string.Empty;
+        public Guid UserId { get; set; }
 
         public int RoleId { get; set; }
 

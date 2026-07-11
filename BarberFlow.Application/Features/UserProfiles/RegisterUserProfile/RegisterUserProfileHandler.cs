@@ -1,5 +1,4 @@
 ﻿using BarberFlow.Application.Common.Exceptions;
-using BarberFlow.Application.Common.Validation;
 using BarberFlow.Application.Features.Appointments.Exceptions;
 using BarberFlow.Application.Features.Roles.Exceptions;
 using BarberFlow.Domain.Constants;
@@ -34,7 +33,9 @@ namespace BarberFlow.Application.Features.UserProfiles.RegisterUserProfile
             RegisterUserProfileCommand request,
             CancellationToken cancellationToken)
         {
-            var user = await ValidateRequest(request, cancellationToken);
+            var user = await ValidateRequest(
+                request,
+                cancellationToken);
 
             var profile = new UserProfile(
                 user.Id,
@@ -55,16 +56,18 @@ namespace BarberFlow.Application.Features.UserProfiles.RegisterUserProfile
             RegisterUserProfileCommand request,
             CancellationToken cancellationToken)
         {
-            var normalizedPhone = PhoneNumberValidator.NormalizeAndValidate(request.PhoneNumber);
+            if (request.UserId == Guid.Empty)
+                throw new ValidationException("UserId is required.");
 
             if (request.RoleId != RoleIds.Client &&
                 request.RoleId != RoleIds.Barber)
             {
-                throw new ValidationException("The selected role cannot be self-registered.");
+                throw new ValidationException(
+                    "The selected role cannot be self-registered.");
             }
 
-            var user = await _userRepository.GetByPhoneNumberAsync(
-                normalizedPhone,
+            var user = await _userRepository.GetByIdAsync(
+                request.UserId,
                 cancellationToken);
 
             if (user == null)
@@ -81,7 +84,7 @@ namespace BarberFlow.Application.Features.UserProfiles.RegisterUserProfile
                 throw new RoleNotFoundException();
 
             var exists = await _userProfileRepository.ExistsAsync(
-                user.Id,
+                request.UserId,
                 request.RoleId,
                 cancellationToken);
 

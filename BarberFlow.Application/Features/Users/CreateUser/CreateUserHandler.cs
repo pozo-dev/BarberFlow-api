@@ -1,5 +1,4 @@
 ﻿using BarberFlow.Application.Common.Exceptions;
-using BarberFlow.Application.Common.Utils;
 using BarberFlow.Application.Common.Validation;
 using BarberFlow.Application.Features.Users.Exceptions;
 using BarberFlow.Domain.Entities;
@@ -9,7 +8,7 @@ using MediatR;
 
 namespace BarberFlow.Application.Features.Users.CreateUser
 {
-    public class CreateUserHandler : IRequestHandler<CreateUserCommand, Guid>
+    public class CreateUserHandler : IRequestHandler<CreateUserCommand, CreateUserResponseDto>
     {
         private readonly IUserRepository _userRepository;
         private readonly IUnitOfWork _unitOfWork;
@@ -22,7 +21,7 @@ namespace BarberFlow.Application.Features.Users.CreateUser
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<Guid> Handle(CreateUserCommand request, CancellationToken cancellationToken)
+        public async Task<CreateUserResponseDto> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {
             var normalizedPhone = PhoneNumberValidator.NormalizeAndValidate(request.PhoneNumber);
 
@@ -39,7 +38,10 @@ namespace BarberFlow.Application.Features.Users.CreateUser
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return user.Id;
+            return new CreateUserResponseDto
+            {
+                UserId = user.Id
+            };
         }
 
         private static void Validate(string phoneNumber)
