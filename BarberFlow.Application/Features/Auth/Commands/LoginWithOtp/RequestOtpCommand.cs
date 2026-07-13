@@ -5,7 +5,7 @@ namespace BarberFlow.Application.Features.Auth.Commands.LoginWithOtp
 {
     public class RequestOtpCommand : IRequest<OtpResponseDto>
     {
-        public string PhoneNumber { get; set; } = default!;
+        public Guid UserId { get; set; }
 
         public Guid UserProfileId { get; set; }
     }

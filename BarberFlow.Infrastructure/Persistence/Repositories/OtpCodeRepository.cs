@@ -18,6 +18,14 @@ namespace BarberFlow.Infrastructure.Persistence.Repositories
             _context.OtpCodes.Add(otp);
         }
 
+        public async Task<OtpCode?> GetByIdAsync(Guid otpId, CancellationToken cancellationToken)
+        {
+            return await _context.OtpCodes
+                            .FirstOrDefaultAsync(
+                                x => x.Id == otpId,
+                                cancellationToken);
+        }
+
         public async Task<OtpCode?> GetLastValidOtpAsync(Guid userId, CancellationToken cancellationToken)
         {
             return await _context.OtpCodes

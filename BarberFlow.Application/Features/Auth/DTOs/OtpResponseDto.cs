@@ -2,7 +2,7 @@
 {
     public class OtpResponseDto
     {
-        public string OtpCode { get; set; }
+        public Guid OtpId { get; set; }
         public DateTime ExpiresAt { get; set; }
     }
 }

@@ -33,8 +33,8 @@ namespace BarberFlow.Application.Features.Auth.Commands.LoginWithOtp
 
         public async Task<OtpResponseDto> Handle(RequestOtpCommand request, CancellationToken cancellationToken)
         {
-            var normalizedPhone = ValidateRequest(request);
-            var user = await _userRepository.GetByPhoneNumberAsync(normalizedPhone, cancellationToken);
+            ValidateRequest(request);
+            var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
             if (user == null)
                 throw new UserNotFoundException();
 
@@ -71,21 +71,21 @@ namespace BarberFlow.Application.Features.Auth.Commands.LoginWithOtp
 
             var dto = new OtpResponseDto
             {
-                OtpCode = code,
+                //OtpCode = code,
+                OtpId = otp.Id,
                 ExpiresAt = expiresAt
             };
 
             return (otp, dto);
         }
 
-        private static string ValidateRequest(RequestOtpCommand request)
+        private static void ValidateRequest(RequestOtpCommand request)
         {
-            var normalizedPhone = PhoneNumberValidator.NormalizeAndValidate(request.PhoneNumber);
+            if (request.UserId == Guid.Empty)
+                throw new ValidationException("User is required.");
 
             if (request.UserProfileId == Guid.Empty)
                 throw new ValidationException("User profile is required.");
-
-            return normalizedPhone;
         }
     }
 }
