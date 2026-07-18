@@ -38,17 +38,6 @@ public class JwtService : IJwtService
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
-
-        //var x = string.Empty;
-        //try
-        //{
-        //    x = new JwtSecurityTokenHandler().WriteToken(token);
-
-        //} catch(Exception ex)
-        //{
-
-        //}
-        //return x;
     }
 
     public string GenerateRefreshToken()
