@@ -13,22 +13,30 @@ namespace BarberFlow.Infrastructure.Persistence.Configurations
             builder.HasKey(x => x.Id);
 
             builder.Property(x => x.Name)
-                .IsRequired()
-                .HasMaxLength(100);
+                .HasMaxLength(80)
+                .IsRequired();
 
             builder.Property(x => x.Description)
-                .HasMaxLength(300);
+                .HasMaxLength(500);
+
+            builder.Property(x => x.Price)
+                .HasPrecision(10, 2);
+
+            builder.Property(x => x.Duration)
+                .IsRequired();
+
+            builder.Property(x => x.DisplayOrder)
+                .HasDefaultValue(0);
 
             builder.Property(x => x.IsActive)
-                .IsRequired();
+                .HasDefaultValue(true);
 
-            builder.Property(x => x.CreatedAt)
-                .IsRequired();
-
-            builder.HasMany(x => x.ServicePrices)
-                .WithOne(x => x.Service)
-                .HasForeignKey(x => x.ServiceId)
+            builder.HasOne(x => x.BarberShop)
+                .WithMany(x => x.Services)
+                .HasForeignKey(x => x.BarberShopId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasIndex(x => new { x.BarberShopId, x.IsActive });
         }
     }
 }
