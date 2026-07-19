@@ -9,7 +9,9 @@ namespace BarberFlow.Infrastructure.Extensions
 {
     public static class AuthenticationExtensions
     {
-        public static IServiceCollection AddAuthentication(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddAuthentication(
+            this IServiceCollection services,
+            IConfiguration configuration)
         {
             var jwtSettings = configuration
                 .GetSection(JwtSettings.SectionName)
