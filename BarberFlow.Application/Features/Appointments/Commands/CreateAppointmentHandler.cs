@@ -1,7 +1,7 @@
 using BarberFlow.Application.Common.Interfaces;
 using BarberFlow.Application.Features.Appointments.DTOs;
 using BarberFlow.Application.Features.Appointments.Exceptions;
-using BarberFlow.Application.Features.BarberShop.Exceptions;
+using BarberFlow.Application.Features.BarberShops.Exceptions;
 using BarberFlow.Application.Features.ServicePrice.Exceptions;
 using BarberFlow.Application.Features.Services.Exceptions;
 using BarberFlow.Domain.Entities;

@@ -1,4 +1,4 @@
-﻿namespace BarberFlow.Application.Features.BarberShop.Exceptions
+﻿namespace BarberFlow.Application.Features.BarberShops.Exceptions
 {
     public class BarberShopNotFoundException : Exception
     {
