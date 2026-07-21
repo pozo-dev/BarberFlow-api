@@ -30,11 +30,14 @@
 
         public ICollection<Appointment> Appointments { get; private set; }
 
+        public ICollection<Branch> Branches { get; private set; }
+
         private BarberShop()
         {
             Services = new List<Service>();
             Barbers = new List<UserProfile>();
             Appointments = new List<Appointment>();
+            Branches = new List<Branch>();
         }
 
         public BarberShop(
@@ -62,6 +65,7 @@
             Services = new List<Service>();
             Barbers = new List<UserProfile>();
             Appointments = new List<Appointment>();
+            Branches = new List<Branch>();
         }
 
         public void Update(
