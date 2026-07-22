@@ -35,10 +35,6 @@ namespace BarberFlow.Application.Features.Services.Commands.CreateService
             var barberShop = await _barberShopRepository
                 .GetByOwnerUserIdAsync(userId, cancellationToken);
 
-            //if (barberShop is null)
-            //    throw new InvalidOperationException(
-            //        "Debes crear tu barbería antes de agregar servicios.");
-
             if (barberShop == null)
                 throw new BarberShopNotFoundException();
 

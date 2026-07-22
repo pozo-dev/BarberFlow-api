@@ -18,7 +18,20 @@ namespace BarberFlow.Infrastructure.Persistence.Repositories
             _context.UserProfiles.Add(userProfile);
         }
 
-        public Task<UserProfile?> GetActiveByIdAndUserIdAsync(Guid id, Guid userId, CancellationToken cancellationToken)
+        public async Task<UserProfile?> GetByIdAsync(
+            Guid id,
+            CancellationToken cancellationToken)
+        {
+            return await _context.UserProfiles
+                .FirstOrDefaultAsync(
+                    x => x.Id == id,
+                    cancellationToken);
+        }
+
+        public Task<UserProfile?> GetActiveByIdAndUserIdAsync(
+            Guid id,
+            Guid userId,
+            CancellationToken cancellationToken)
         {
             return _context.UserProfiles
                     .FirstOrDefaultAsync(x =>
@@ -28,7 +41,9 @@ namespace BarberFlow.Infrastructure.Persistence.Repositories
                         cancellationToken);
         }
 
-        public async Task<IReadOnlyCollection<UserProfile>> GetActiveByUserIdAsync(Guid userId, CancellationToken cancellationToken)
+        public async Task<IReadOnlyCollection<UserProfile>> GetActiveByUserIdAsync(
+            Guid userId,
+            CancellationToken cancellationToken)
         {
             return await _context.UserProfiles
                 .Where(x => x.UserId == userId && x.IsActive)
@@ -36,7 +51,10 @@ namespace BarberFlow.Infrastructure.Persistence.Repositories
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<bool> ExistsAsync(Guid userId, int roleId, CancellationToken cancellationToken)
+        public async Task<bool> ExistsAsync(
+            Guid userId,
+            int roleId,
+            CancellationToken cancellationToken)
         {
             return await _context.UserProfiles
                 .AnyAsync(x =>

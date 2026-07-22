@@ -18,6 +18,8 @@ namespace BarberFlow.Infrastructure.Persistence
         public DbSet<OtpCode> OtpCodes { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<Role> Roles { get; set; }
+        public DbSet<Branch> Branches { get; set; }
+        public DbSet<BarberAssignment> BarberAssignments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

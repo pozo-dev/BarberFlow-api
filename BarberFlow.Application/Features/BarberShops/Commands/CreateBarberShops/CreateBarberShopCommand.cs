@@ -1,5 +1,4 @@
-﻿using BarberFlow.Application.Features.BarberShops.Commands.CreateBarberShop;
-using MediatR;
+﻿using MediatR;
 
 namespace BarberFlow.Application.Features.BarberShops.Commands.CreateBarberShop
 {

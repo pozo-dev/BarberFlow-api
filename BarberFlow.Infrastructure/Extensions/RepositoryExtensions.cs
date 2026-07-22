@@ -22,6 +22,8 @@ namespace BarberFlow.Infrastructure.Extensions
             services.AddScoped<IServicePriceRepository, ServicePriceRepository>();
             services.AddScoped<IAppointmentRepository, AppointmentRepository>();
             services.AddScoped<IRoleRepository, RoleRepository>();
+            services.AddScoped<IBranchRepository, BranchRepository>();
+            services.AddScoped<IBarberAssignmentRepository, BarberAssignmentRepository>();
 
             return services;
         }

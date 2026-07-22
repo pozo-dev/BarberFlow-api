@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <Compile Remove="Features\Auth\DTOs\LoginProfileDto.cs" />
+    <Compile Remove="Features\BarberShops\Exceptions\BarberShopAssociationException.cs" />
+    <Compile Remove="Features\UserProfiles\Exceptions\CurrentProfileUnavailableException.cs" />
   </ItemGroup>
 
   <ItemGroup>

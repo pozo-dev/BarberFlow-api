@@ -1,5 +1,4 @@
 ﻿using BarberFlow.Application.Common.Interfaces;
-using BarberFlow.Application.Features.BarberShops.Commands.CreateBarberShop;
 using BarberFlow.Domain.Entities;
 using BarberFlow.Domain.Interfaces;
 using MediatR;

@@ -30,7 +30,7 @@ namespace BarberFlow.Infrastructure.Services
             }
         }
 
-        public Guid profileId
+        public Guid ProfileId
         {
             get
             {
@@ -46,7 +46,7 @@ namespace BarberFlow.Infrastructure.Services
             }
         }
 
-        public Guid roleId
+        public Guid RoleId
         {
             get
             {

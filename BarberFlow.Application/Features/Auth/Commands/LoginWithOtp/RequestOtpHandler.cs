@@ -1,7 +1,5 @@
 ﻿using BarberFlow.Application.Common.Exceptions;
 using BarberFlow.Application.Common.Security;
-using BarberFlow.Application.Common.Utils;
-using BarberFlow.Application.Common.Validation;
 using BarberFlow.Application.Features.Appointments.Exceptions;
 using BarberFlow.Application.Features.Auth.DTOs;
 using BarberFlow.Domain.Constants;
