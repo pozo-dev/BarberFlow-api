@@ -59,6 +59,7 @@ namespace BarberFlow.Application.Features.Branches.Commands.CreateBranch
                 profile.BarberShopId.Value,
                 request.Name,
                 request.Address,
+                request.City,
                 request.PhoneNumber);
 
             await _branchRepository.AddAsync(

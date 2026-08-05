@@ -1,6 +1,7 @@
 ﻿using BarberFlow.Application.Common.Exceptions;
 using BarberFlow.Application.Features.Appointments.Exceptions;
 using BarberFlow.Application.Features.Auth.Exceptions;
+using BarberFlow.Application.Features.Branches.Exceptions;
 using BarberFlow.Application.Features.Users.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
@@ -37,9 +38,15 @@ namespace BarberFlow.Api.Middlewares
             {
                 ValidationException => StatusCodes.Status400BadRequest,
 
+                ForbiddenAccessException => StatusCodes.Status403Forbidden,
+
+                BranchNotFoundException => StatusCodes.Status404NotFound,
+
                 UserNotFoundException => StatusCodes.Status404NotFound,
 
                 UserAlreadyExistsException => StatusCodes.Status409Conflict,
+
+                DuplicateBranchNameException => StatusCodes.Status409Conflict,
 
                 UserNotActiveException => StatusCodes.Status401Unauthorized,
 

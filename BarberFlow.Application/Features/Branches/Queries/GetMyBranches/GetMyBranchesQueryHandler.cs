@@ -51,10 +51,13 @@ namespace BarberFlow.Application.Features.Branches.Queries.GetMyBranches
                     Id = x.Id,
                     Name = x.Name,
                     Address = x.Address,
+                    City = x.City,
                     PhoneNumber = x.PhoneNumber,
                     IsActive = x.IsActive,
+                    IsMain = x.IsMain,
                     CreatedAt = x.CreatedAt
                 })
+                .OrderBy(x => x.CreatedAt)
                 .ToList();
         }
     }

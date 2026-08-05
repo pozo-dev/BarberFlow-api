@@ -38,12 +38,7 @@ namespace BarberFlow.Application.Features.BarberShops.Commands.UpdateBarberShop
 
             barberShop.Update(
                 request.Name,
-                request.Description,
-                request.PhoneNumber,
-                request.Address,
-                request.City,
-                TimeOnly.FromTimeSpan(request.OpenTime),
-                TimeOnly.FromTimeSpan(request.CloseTime));
+                request.Description);
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 

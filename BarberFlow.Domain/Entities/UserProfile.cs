@@ -1,4 +1,7 @@
-﻿namespace BarberFlow.Domain.Entities
+﻿using BarberFlow.Domain.Constants;
+using System.ComponentModel.DataAnnotations;
+
+namespace BarberFlow.Domain.Entities
 {
     public class UserProfile
     {
@@ -31,6 +34,19 @@
             CreatedAt = DateTime.UtcNow;
             RefreshTokens = new List<RefreshToken>();
             BarberAssignments = new List<BarberAssignment>();
+        }
+
+        public void AssignBarberShop(Guid barberShopId)
+        {
+            if (RoleId != RoleIds.Barber)
+                throw new ValidationException(
+                    "Solo un perfil de barbero puede tener una barbería.");
+
+            if (barberShopId == Guid.Empty)
+                throw new ValidationException(
+                    "La barbería es requerida.");
+
+            BarberShopId = barberShopId;
         }
 
         public void Deactivate()

@@ -8,6 +8,10 @@
 
   <ItemGroup>
     <Compile Remove="Extensions\SwaggerExtensions.cs" />
+    <Compile Remove="Migrations\20260725004111_RefactorBarberShopIntoBranch.cs" />
+    <Compile Remove="Migrations\20260725004111_RefactorBarberShopIntoBranch.Designer.cs" />
+    <Compile Remove="Migrations\20260725005048_RefactorBarberShopIntoBranch.cs" />
+    <Compile Remove="Migrations\20260725005048_RefactorBarberShopIntoBranch.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

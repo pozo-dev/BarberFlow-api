@@ -1,6 +1,6 @@
-﻿namespace BarberFlow.Application.Features.Branches.Queries.GetMyBranches
+﻿namespace BarberFlow.Application.Features.Branches.Queries.GetBranchById
 {
-    public class BranchDto
+    public class BranchDetailResponseDto
     {
         public Guid Id { get; set; }
 
@@ -12,10 +12,9 @@
 
         public string PhoneNumber { get; set; } = string.Empty;
 
-        public bool IsActive { get; set; }
-
         public bool IsMain { get; set; }
 
-        public DateTime CreatedAt { get; set; }
+        public bool IsActive { get; set; }
+
     }
 }

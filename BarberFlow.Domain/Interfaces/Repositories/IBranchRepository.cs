@@ -12,6 +12,10 @@ namespace BarberFlow.Domain.Interfaces.Repositories
             Guid id,
             CancellationToken cancellationToken);
 
+        Task<Branch?> GetMainBranchAsync(
+            Guid barberShopId,
+            CancellationToken cancellationToken);
+
         Task<bool> ExistsByNameAsync(
             Guid barberShopId,
             string name,

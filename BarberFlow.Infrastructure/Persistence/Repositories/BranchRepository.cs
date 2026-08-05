@@ -28,8 +28,22 @@ namespace BarberFlow.Infrastructure.Persistence.Repositories
             CancellationToken cancellationToken)
         {
             return await _context.Branches
+                .Include(x => x.BarberShop)
+                .Include(x => x.Schedules)
                 .Include(x => x.BarberAssignments)
                 .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+        }
+
+        public async Task<Branch?> GetMainBranchAsync(
+            Guid barberShopId,
+            CancellationToken cancellationToken)
+        {
+            return await _context.Branches
+                .Include(x => x.Schedules)
+                .FirstOrDefaultAsync(
+                    x => x.BarberShopId == barberShopId &&
+                         x.IsMain,
+                    cancellationToken);
         }
 
         public async Task<bool> ExistsByNameAsync(

@@ -20,6 +20,7 @@ namespace BarberFlow.Infrastructure.Persistence
         public DbSet<Role> Roles { get; set; }
         public DbSet<Branch> Branches { get; set; }
         public DbSet<BarberAssignment> BarberAssignments { get; set; }
+        public DbSet<BranchSchedule> BranchSchedules { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -4,9 +4,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace BarberFlow.Infrastructure.Persistence.Configurations
 {
-    public class BranchConfiguration : IEntityTypeConfiguration<Branch>
+    public class BranchConfiguration
+        : IEntityTypeConfiguration<Branch>
     {
-        public void Configure(EntityTypeBuilder<Branch> builder)
+        public void Configure(
+            EntityTypeBuilder<Branch> builder)
         {
             builder.ToTable("Branches");
 
@@ -20,17 +22,31 @@ namespace BarberFlow.Infrastructure.Persistence.Configurations
                 .HasMaxLength(300)
                 .IsRequired();
 
+            builder.Property(x => x.City)
+                .HasMaxLength(120)
+                .IsRequired();
+
             builder.Property(x => x.PhoneNumber)
                 .HasMaxLength(20)
                 .IsRequired();
 
-            builder.HasIndex(x => new { x.BarberShopId, x.Name })
-                .IsUnique();
+            builder.Property(x => x.IsMain)
+                .IsRequired();
 
-            builder.HasOne(x => x.BarberShop)
-                .WithMany(x => x.Branches)
-                .HasForeignKey(x => x.BarberShopId)
+            builder.Property(x => x.IsActive)
+                .IsRequired();
+
+            builder.Property(x => x.CreatedAt)
+                .IsRequired();
+
+            builder.HasMany(x => x.Schedules)
+                .WithOne(x => x.Branch)
+                .HasForeignKey(x => x.BranchId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(x => x.BarberAssignments)
+                .WithOne(x => x.Branch)
+                .HasForeignKey(x => x.BranchId);
         }
     }
 }

@@ -47,7 +47,7 @@ namespace BarberFlow.Application.Features.Branches.Commands.RemoveBarberFromBran
                 throw new UserProfileNotFoundException();
 
             var branch = await _branchRepository.GetByIdAsync(
-                request.BranchId,
+                request.Id,
                 cancellationToken);
 
             if (branch == null)
@@ -57,7 +57,7 @@ namespace BarberFlow.Application.Features.Branches.Commands.RemoveBarberFromBran
                 throw new ForbiddenAccessException();
 
             var assignment = await _assignmentRepository.GetAsync(
-                request.BranchId,
+                request.Id,
                 request.BarberProfileId,
                 cancellationToken);
 

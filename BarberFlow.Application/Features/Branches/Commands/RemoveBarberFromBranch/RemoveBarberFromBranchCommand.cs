@@ -4,7 +4,7 @@ namespace BarberFlow.Application.Features.Branches.Commands.RemoveBarberFromBran
 {
     public class RemoveBarberFromBranchCommand : IRequest
     {
-        public Guid BranchId { get; set; }
+        public Guid Id { get; set; }
 
         public Guid BarberProfileId { get; set; }
     }

@@ -2,7 +2,8 @@
 
 namespace BarberFlow.Application.Features.Branches.Commands.UpdateBranch
 {
-    public class UpdateBranchCommand : IRequest
+    public class UpdateBranchCommand
+        : IRequest<UpdateBranchResponseDto>
     {
         public Guid Id { get; set; }
 
@@ -10,6 +11,9 @@ namespace BarberFlow.Application.Features.Branches.Commands.UpdateBranch
 
         public string Address { get; set; } = string.Empty;
 
+        public string City { get; set; } = string.Empty;
+
         public string PhoneNumber { get; set; } = string.Empty;
+
     }
 }

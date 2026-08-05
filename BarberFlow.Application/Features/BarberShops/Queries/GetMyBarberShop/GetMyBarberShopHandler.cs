@@ -1,6 +1,5 @@
 ﻿using BarberFlow.Application.Common.Interfaces;
 using BarberFlow.Application.Features.BarberShops.Exceptions;
-using BarberFlow.Application.Features.BarberShops.Queries.GetMyBarberShop;
 using MediatR;
 
 namespace BarberFlow.Application.Features.BarberShops.Queries.GetMyBarberShop
@@ -38,11 +37,11 @@ namespace BarberFlow.Application.Features.BarberShops.Queries.GetMyBarberShop
                 Id = barberShop.Id,
                 Name = barberShop.Name,
                 Description = barberShop.Description,
-                PhoneNumber = barberShop.PhoneNumber,
-                Address = barberShop.Address,
-                City = barberShop.City,
-                OpenTime = barberShop.OpenTime,
-                CloseTime = barberShop.CloseTime
+                //PhoneNumber = barberShop.PhoneNumber,
+                //Address = barberShop.Address,
+                //City = barberShop.City,
+                //OpenTime = barberShop.OpenTime,
+                //CloseTime = barberShop.CloseTime
             };
         }
     }

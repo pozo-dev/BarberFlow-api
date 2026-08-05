@@ -1,34 +1,35 @@
 using BarberFlow.Application.Common.Exceptions;
 using BarberFlow.Application.Common.Interfaces;
 using BarberFlow.Application.Features.Branches.Exceptions;
+using BarberFlow.Domain.Entities;
 using BarberFlow.Domain.Interfaces;
 using BarberFlow.Domain.Interfaces.Repositories;
 using MediatR;
 
-namespace BarberFlow.Application.Features.Branches.Commands.UpdateBranch
+namespace BarberFlow.Application.Features.Schedules.Commands.UpdateSchedules
 {
-    public class UpdateBranchCommandHandler
-        : IRequestHandler<UpdateBranchCommand, UpdateBranchResponseDto>
+    public class UpdateSchedulesCommandHandler
+        : IRequestHandler<UpdateSchedulesCommand, UpdateSchedulesResponseDto>
     {
-        private readonly IBranchRepository _branchRepository;
         private readonly ICurrentUserService _currentUserService;
         private readonly IUserProfileRepository _userProfileRepository;
+        private readonly IBranchRepository _branchRepository;
         private readonly IUnitOfWork _unitOfWork;
 
-        public UpdateBranchCommandHandler(
-            IBranchRepository branchRepository,
+        public UpdateSchedulesCommandHandler(
             ICurrentUserService currentUserService,
             IUserProfileRepository userProfileRepository,
+            IBranchRepository branchRepository,
             IUnitOfWork unitOfWork)
         {
-            _branchRepository = branchRepository;
             _currentUserService = currentUserService;
             _userProfileRepository = userProfileRepository;
+            _branchRepository = branchRepository;
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<UpdateBranchResponseDto> Handle(
-            UpdateBranchCommand request,
+        public async Task<UpdateSchedulesResponseDto> Handle(
+            UpdateSchedulesCommand request,
             CancellationToken cancellationToken)
         {
             var profileId = _currentUserService.ProfileId;
@@ -44,7 +45,7 @@ namespace BarberFlow.Application.Features.Branches.Commands.UpdateBranch
                 throw new UserProfileNotFoundException();
 
             var branch = await _branchRepository.GetByIdAsync(
-                request.Id,
+                request.BranchId,
                 cancellationToken);
 
             if (branch is null)
@@ -55,20 +56,24 @@ namespace BarberFlow.Application.Features.Branches.Commands.UpdateBranch
 
             try
             {
-                branch.Update(
-                    request.Name,
-                    request.Address,
-                    request.City,
-                    request.PhoneNumber);
+                branch.UpdateSchedules(request.Schedules
+                    .Select(x => new BranchScheduleUpdate(
+                        x.ScheduleId,
+                        x.DayOfWeek,
+                        TimeOnly.FromTimeSpan(x.OpenTime),
+                        TimeOnly.FromTimeSpan(x.CloseTime),
+                        x.IsClosed))
+                    .ToList());
             }
-            catch (ArgumentException exception)
+            catch (Exception exception) when (
+                exception is ArgumentException or InvalidOperationException)
             {
                 throw new ValidationException(exception.Message);
             }
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return new UpdateBranchResponseDto { Id = branch.Id };
+            return new UpdateSchedulesResponseDto { BranchId = branch.Id };
         }
     }
 }
