@@ -3,6 +3,7 @@ using BarberFlow.Application.Features.Appointments.Exceptions;
 using BarberFlow.Application.Features.Auth.Exceptions;
 using BarberFlow.Application.Features.Branches.Exceptions;
 using BarberFlow.Application.Features.Users.Exceptions;
+using BarberFlow.Application.Features.Collaborators.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Text.Json;
@@ -41,6 +42,8 @@ namespace BarberFlow.Api.Middlewares
                 ForbiddenAccessException => StatusCodes.Status403Forbidden,
 
                 BranchNotFoundException => StatusCodes.Status404NotFound,
+
+                CollaboratorNotFoundException => StatusCodes.Status404NotFound,
 
                 UserNotFoundException => StatusCodes.Status404NotFound,
 
