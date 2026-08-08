@@ -38,9 +38,9 @@ namespace BarberFlow.Domain.Entities
 
         public void AssignBarberShop(Guid barberShopId)
         {
-            if (RoleId != RoleIds.Barber)
+            if (RoleId != RoleIds.Owner)
                 throw new ValidationException(
-                    "Solo un perfil de barbero puede tener una barbería.");
+                    "Solo un perfil de propietario puede tener una barbería.");
 
             if (barberShopId == Guid.Empty)
                 throw new ValidationException(

@@ -32,14 +32,19 @@ namespace BarberFlow.Application.Features.BarberShops.Queries.GetMyBarberShop
                 throw new BarberShopNotFoundException();
             }
 
+            var mainBranch = barberShop.Branches
+                .SingleOrDefault(branch => branch.IsMain);
+
             return new GetMyBarberShopResponseDto
             {
                 Id = barberShop.Id,
                 Name = barberShop.Name,
                 Description = barberShop.Description,
-                //PhoneNumber = barberShop.PhoneNumber,
-                //Address = barberShop.Address,
-                //City = barberShop.City,
+                Logo = barberShop.Logo,
+                Banner = barberShop.Banner,
+                PhoneNumber = mainBranch?.PhoneNumber ?? string.Empty,
+                Address = mainBranch?.Address ?? string.Empty,
+                City = mainBranch?.City ?? string.Empty,
                 //OpenTime = barberShop.OpenTime,
                 //CloseTime = barberShop.CloseTime
             };

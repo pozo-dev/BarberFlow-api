@@ -21,6 +21,14 @@ namespace BarberFlow.Infrastructure.Persistence.Configurations
             builder.Property(x => x.Description)
                 .HasMaxLength(500);
 
+            builder.Property(x => x.Logo)
+                .HasColumnType("varbinary(max)")
+                .IsRequired();
+
+            builder.Property(x => x.Banner)
+                .HasColumnType("varbinary(max)")
+                .IsRequired();
+
             builder.Property(x => x.IsActive)
                 .IsRequired();
 

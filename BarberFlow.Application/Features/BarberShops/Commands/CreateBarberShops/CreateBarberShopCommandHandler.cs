@@ -34,6 +34,8 @@ namespace BarberFlow.Application.Features.BarberShops.Commands.CreateBarberShop
             CreateBarberShopCommand request,
             CancellationToken cancellationToken)
         {
+            ValidateImages(request.Logo, request.Banner);
+
             var ownerUserId = _currentUserService.UserId;
             var profileId = _currentUserService.ProfileId;
 
@@ -64,7 +66,9 @@ namespace BarberFlow.Application.Features.BarberShops.Commands.CreateBarberShop
             var barberShop = BarberShop.Create(
                 ownerUserId,
                 request.Name,
-                request.Description);
+                request.Description,
+                request.Logo,
+                request.Banner);
 
             _barberShopRepository.Add(barberShop);
 
@@ -91,6 +95,15 @@ namespace BarberFlow.Application.Features.BarberShops.Commands.CreateBarberShop
             {
                 BarberShopId = barberShop.Id
             };
+        }
+
+        private static void ValidateImages(byte[] logo, byte[] banner)
+        {
+            if (logo.Length == 0)
+                throw new ValidationException("El logo es requerido.");
+
+            if (banner.Length == 0)
+                throw new ValidationException("El banner es requerido.");
         }
     }
 

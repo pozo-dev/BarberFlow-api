@@ -10,6 +10,10 @@
 
         public string Description { get; private set; }
 
+        public byte[] Logo { get; private set; } = Array.Empty<byte>();
+
+        public byte[] Banner { get; private set; } = Array.Empty<byte>();
+
         public bool IsActive { get; private set; }
 
         public DateTime CreatedAt { get; private set; }
@@ -33,7 +37,9 @@
         private BarberShop(
             Guid ownerUserId,
             string name,
-            string description)
+            string description,
+            byte[] logo,
+            byte[] banner)
         {
             Id = Guid.NewGuid();
 
@@ -42,6 +48,10 @@
             Name = name.Trim();
 
             Description = description.Trim();
+
+            Logo = logo;
+
+            Banner = banner;
 
             IsActive = true;
 
@@ -56,18 +66,26 @@
         public static BarberShop Create(
             Guid ownerUserId,
             string name,
-            string description)
+            string description,
+            byte[] logo,
+            byte[] banner)
         {
-            return new BarberShop(ownerUserId, name, description);
+            return new BarberShop(ownerUserId, name, description, logo, banner);
         }
 
         public void Update(
             string name,
-            string description)
+            string description,
+            byte[] logo,
+            byte[] banner)
         {
             Name = name.Trim();
 
             Description = description.Trim();
+
+            Logo = logo;
+
+            Banner = banner;
         }
 
         public void Activate()

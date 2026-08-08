@@ -8,11 +8,15 @@
 
         public string Description { get; set; } = string.Empty;
 
-        //public string PhoneNumber { get; set; } = string.Empty;
+        public byte[] Logo { get; set; } = Array.Empty<byte>();
 
-        //public string Address { get; set; } = string.Empty;
+        public byte[] Banner { get; set; } = Array.Empty<byte>();
 
-        //public string City { get; set; } = string.Empty;
+        public string PhoneNumber { get; set; } = string.Empty;
+
+        public string Address { get; set; } = string.Empty;
+
+        public string City { get; set; } = string.Empty;
 
         //public TimeOnly OpenTime { get; set; }
 

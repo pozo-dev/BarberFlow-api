@@ -28,8 +28,7 @@ namespace BarberFlow.Infrastructure.Persistence.Repositories
             CancellationToken cancellationToken)
         {
             return await _context.BarberShops
-                //.Include(x => x.Services)
-                //.Include(x => x.Barbers)
+                .Include(x => x.Branches)
                 .FirstOrDefaultAsync(
                     x => x.OwnerUserId == ownerUserId,
                     cancellationToken);

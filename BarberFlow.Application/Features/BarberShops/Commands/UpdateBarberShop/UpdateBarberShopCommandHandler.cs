@@ -1,4 +1,5 @@
-﻿using BarberFlow.Application.Common.Interfaces;
+﻿using BarberFlow.Application.Common.Exceptions;
+using BarberFlow.Application.Common.Interfaces;
 using BarberFlow.Application.Features.BarberShops.Exceptions;
 using BarberFlow.Domain.Interfaces;
 using MediatR;
@@ -26,6 +27,8 @@ namespace BarberFlow.Application.Features.BarberShops.Commands.UpdateBarberShop
             UpdateBarberShopCommand request,
             CancellationToken cancellationToken)
         {
+            ValidateImages(request.Logo, request.Banner);
+
             var barberShop =
                 await _barberShopRepository.GetByOwnerUserIdAsync(
                     _currentUserService.UserId,
@@ -38,7 +41,9 @@ namespace BarberFlow.Application.Features.BarberShops.Commands.UpdateBarberShop
 
             barberShop.Update(
                 request.Name,
-                request.Description);
+                request.Description,
+                request.Logo,
+                request.Banner);
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
@@ -46,6 +51,19 @@ namespace BarberFlow.Application.Features.BarberShops.Commands.UpdateBarberShop
             {
                 BarberShopId = barberShop.Id
             };
+        }
+
+        private static void ValidateImages(byte[] logo, byte[] banner)
+        {
+            if (logo.Length == 0)
+            {
+                throw new ValidationException("El logo es requerido.");
+            }
+
+            if (banner.Length == 0)
+            {
+                throw new ValidationException("El banner es requerido.");
+            }
         }
     }
 }

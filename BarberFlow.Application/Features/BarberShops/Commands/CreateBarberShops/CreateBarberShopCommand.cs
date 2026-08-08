@@ -16,5 +16,9 @@ namespace BarberFlow.Application.Features.BarberShops.Commands.CreateBarberShop
 
         public string City { get; set; } = string.Empty;
 
+        public byte[] Logo { get; set; } = Array.Empty<byte>();
+
+        public byte[] Banner { get; set; } = Array.Empty<byte>();
+
     }
 }

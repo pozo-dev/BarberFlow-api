@@ -1,8 +1,6 @@
 ﻿using BarberFlow.Application.Common.Exceptions;
-using BarberFlow.Application.Common.Utils;
 using BarberFlow.Application.Common.Validation;
 using BarberFlow.Application.Features.Auth.DTOs;
-using BarberFlow.Domain.Entities;
 using BarberFlow.Domain.Interfaces;
 using BarberFlow.Domain.Interfaces.Repositories;
 using MediatR;

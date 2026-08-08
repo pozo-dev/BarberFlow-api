@@ -1,4 +1,6 @@
-﻿using BarberFlow.Application.Features.BarberShops.Commands.CreateBarberShop;
+﻿using BarberFlow.Api.Models;
+using BarberFlow.Api.Validation;
+using BarberFlow.Application.Features.BarberShops.Commands.CreateBarberShop;
 using BarberFlow.Application.Features.BarberShops.Commands.UpdateBarberShop;
 using BarberFlow.Application.Features.BarberShops.Queries.GetMyBarberShop;
 using MediatR;
@@ -26,9 +28,22 @@ namespace BarberFlow.Api.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(CreateBarberShopResponseDto), StatusCodes.Status200OK)]
         public async Task<ActionResult<CreateBarberShopResponseDto>> Create(
-            [FromBody] CreateBarberShopCommand command,
+            [FromForm] CreateBarberShopRequestDto request,
             CancellationToken cancellationToken)
         {
+            var command = new CreateBarberShopCommand
+            {
+                Name = request.Name,
+                Description = request.Description,
+                PhoneNumber = request.PhoneNumber,
+                Address = request.Address,
+                City = request.City,
+                Logo = await BarberShopImageValidator.ReadAndValidateAsync(
+                    request.Logo, "El logo", cancellationToken),
+                Banner = await BarberShopImageValidator.ReadAndValidateAsync(
+                    request.Banner, "El banner", cancellationToken)
+            };
+
             var response = await _mediator.Send(
                 command,
                 cancellationToken);
@@ -50,9 +65,19 @@ namespace BarberFlow.Api.Controllers
         [HttpPut]
         [ProducesResponseType(typeof(UpdateBarberShopResponseDto), StatusCodes.Status200OK)]
         public async Task<ActionResult<UpdateBarberShopResponseDto>> Update(
-            [FromBody] UpdateBarberShopCommand command,
+            [FromForm] UpdateBarberShopRequestDto request,
             CancellationToken cancellationToken)
         {
+            var command = new UpdateBarberShopCommand
+            {
+                Name = request.Name,
+                Description = request.Description,
+                Logo = await BarberShopImageValidator.ReadAndValidateAsync(
+                    request.Logo, "El logo", cancellationToken),
+                Banner = await BarberShopImageValidator.ReadAndValidateAsync(
+                    request.Banner, "El banner", cancellationToken)
+            };
+
             var response =
                 await _mediator.Send(
                     command,
