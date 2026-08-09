@@ -2,6 +2,7 @@
 using BarberFlow.Application.Features.Users.CreateUser;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BarberFlow.Api.Controllers
 {
@@ -25,6 +26,7 @@ namespace BarberFlow.Api.Controllers
         }
 
         [HttpPost("profiles")]
+        [Authorize]
         public async Task<ActionResult<RegisterUserProfileResponseDto>> RegisterProfile(
         RegisterUserProfileCommand command)
         {

@@ -4,6 +4,6 @@
     {
         Guid UserId { get; }
         Guid ProfileId { get; }
-        Guid RoleId { get; }
+        int RoleId { get; }
     }
 }

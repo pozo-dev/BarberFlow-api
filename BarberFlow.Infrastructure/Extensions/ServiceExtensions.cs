@@ -1,6 +1,7 @@
 ﻿using BarberFlow.Application.Common.Interfaces;
 using BarberFlow.Infrastructure.Security;
 using BarberFlow.Infrastructure.Services;
+using BarberFlow.Domain.Interfaces.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BarberFlow.Infrastructure.Extensions
@@ -20,6 +21,7 @@ namespace BarberFlow.Infrastructure.Extensions
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<ITokenEncryptionService, TokenEncryptionService>();
+            services.AddScoped<ISmsService, FakeSmsService>();
 
             return services;
         }

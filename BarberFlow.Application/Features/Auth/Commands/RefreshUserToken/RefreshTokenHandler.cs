@@ -7,6 +7,7 @@ using BarberFlow.Domain.Entities;
 using BarberFlow.Domain.Interfaces;
 using BarberFlow.Domain.Interfaces.Repositories;
 using BarberFlow.Domain.Security;
+using BarberFlow.Application.Common.Security;
 using MediatR;
 
 namespace BarberFlow.Application.Features.Auth.Commands.RefreshUserToken
@@ -35,7 +36,9 @@ namespace BarberFlow.Application.Features.Auth.Commands.RefreshUserToken
 
         public async Task<AuthResponseDto> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
         {
-            var token = await _refreshTokenRepository.GetByTokenAsync(request.RefreshToken, cancellationToken);
+            var token = await _refreshTokenRepository.GetByTokenAsync(
+                Sha256Hasher.Hash(request.RefreshToken),
+                cancellationToken);
 
             //if (token == null || !token.IsActive())
             if (token == null)
@@ -82,7 +85,7 @@ namespace BarberFlow.Application.Features.Auth.Commands.RefreshUserToken
             var newRefreshToken = RefreshToken.Create(
                 user.Id,
                 userProfile.Id,
-                newRefreshTokenValue,
+                Sha256Hasher.Hash(newRefreshTokenValue),
                 now.AddDays(AuthenticationSettings.RefreshTokenExpirationDays),
                 token.DeviceId
             );

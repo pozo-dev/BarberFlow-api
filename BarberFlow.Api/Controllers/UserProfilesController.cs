@@ -1,11 +1,13 @@
 ﻿using BarberFlow.Application.Features.UserProfiles.RegisterUserProfile;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BarberFlow.Api.Controllers
 {
     [ApiController]
     [Route("api/user-profiles")]
+    [Authorize]
     public class UserProfilesController : ControllerBase
     {
         private readonly IMediator _mediator;

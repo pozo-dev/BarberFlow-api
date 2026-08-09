@@ -1,4 +1,5 @@
 ﻿using BarberFlow.Application.Common.Exceptions;
+using BarberFlow.Application.Common.Security;
 using BarberFlow.Application.Features.Auth.Exceptions;
 using BarberFlow.Domain.Interfaces;
 using BarberFlow.Domain.Interfaces.Repositories;
@@ -25,7 +26,9 @@ namespace BarberFlow.Application.Features.Auth.Commands.Logout
             ValidateRequest(request);
 
             var token = await _refreshTokenRepository
-                .GetByTokenAsync(request.RefreshToken, cancellationToken);
+                .GetByTokenAsync(
+                    Sha256Hasher.Hash(request.RefreshToken),
+                    cancellationToken);
 
             if (token == null)
                 throw new InvalidRefreshTokenException();

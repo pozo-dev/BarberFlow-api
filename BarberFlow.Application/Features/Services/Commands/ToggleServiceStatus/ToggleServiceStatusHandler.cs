@@ -8,13 +8,19 @@ namespace BarberFlow.Application.Features.Services.Commands.ToggleServiceStatus
     public class ToggleServiceStatusHandler : IRequestHandler<ToggleServiceStatusCommand>
     {
         private readonly IServiceRepository _serviceRepository;
+        private readonly BarberFlow.Application.Common.Interfaces.ICurrentUserService _currentUserService;
+        private readonly IBarberShopRepository _barberShopRepository;
         private readonly IUnitOfWork _unitOfWork;
 
         public ToggleServiceStatusHandler(
             IServiceRepository serviceRepository,
+            BarberFlow.Application.Common.Interfaces.ICurrentUserService currentUserService,
+            IBarberShopRepository barberShopRepository,
             IUnitOfWork unitOfWork)
         {
             _serviceRepository = serviceRepository;
+            _currentUserService = currentUserService;
+            _barberShopRepository = barberShopRepository;
             _unitOfWork = unitOfWork;
         }
 
@@ -26,6 +32,13 @@ namespace BarberFlow.Application.Features.Services.Commands.ToggleServiceStatus
                 .GetByIdAsync(request.Id, cancellationToken);
 
             if (service is null)
+                throw new ServiceNotFoundException();
+
+            var barberShop = await _barberShopRepository.GetByOwnerUserIdAsync(
+                _currentUserService.UserId,
+                cancellationToken);
+
+            if (barberShop is null || service.BarberShopId != barberShop.Id)
                 throw new ServiceNotFoundException();
 
             if (service.IsActive)

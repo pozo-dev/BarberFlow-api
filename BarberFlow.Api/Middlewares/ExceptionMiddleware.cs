@@ -57,6 +57,18 @@ namespace BarberFlow.Api.Middlewares
 
                 InvalidRefreshTokenException => StatusCodes.Status401Unauthorized,
 
+                UnauthorizedException => StatusCodes.Status401Unauthorized,
+
+                RefreshTokenReuseDetectedException => StatusCodes.Status401Unauthorized,
+
+                BarberFlow.Application.Features.BarberShops.Exceptions.BarberShopNotFoundException => StatusCodes.Status404NotFound,
+
+                BarberFlow.Application.Features.Services.Exceptions.ServiceNotFoundException => StatusCodes.Status404NotFound,
+
+                AppointmentNotFoundException => StatusCodes.Status404NotFound,
+
+                CannotCancelOthersAppointmentException => StatusCodes.Status403Forbidden,
+
                 _ => StatusCodes.Status500InternalServerError
             };
 

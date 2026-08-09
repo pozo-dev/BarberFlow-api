@@ -1,5 +1,6 @@
 ﻿using BarberFlow.Application.Common.Exceptions;
 using BarberFlow.Application.Common.Interfaces;
+using BarberFlow.Application.Common.Security;
 using BarberFlow.Application.Features.Auth.DTOs;
 using BarberFlow.Application.Features.Auth.Exceptions;
 using BarberFlow.Domain.Constants;
@@ -19,7 +20,6 @@ namespace BarberFlow.Application.Features.Auth.Commands.VerifyOtp
         private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly IJwtService _jwtService;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ITokenEncryptionService _tokenEncryptionService;
 
         public VerifyOtpHandler(
             IUserRepository userRepository,
@@ -36,32 +36,7 @@ namespace BarberFlow.Application.Features.Auth.Commands.VerifyOtp
             _refreshTokenRepository = refreshTokenRepository;
             _jwtService = jwtService;
             _unitOfWork = unitOfWork;
-            _tokenEncryptionService = tokenEncryptionService;
         }
-
-        //public async Task<AuthResponseDto> Handle(VerifyOtpCommand request, CancellationToken cancellationToken)
-        //{
-        //    var normalizedPhone = ValidateRequest(request);
-
-        //    var user = await GetUserAsync(normalizedPhone, cancellationToken);
-
-        //    var codeHash = Sha256Hasher.Hash(request.Code);
-        //    var otp = await GetValidOtpAsync(user, codeHash, cancellationToken);
-
-        //    var userProfile = await GetUserProfileAsync(otp, cancellationToken);
-
-        //    await RevokeRefreshTokensAsync(user.Id, request.DeviceId, cancellationToken);
-
-        //    var refreshToken = CreateRefreshToken(user, userProfile, request.DeviceId);
-
-        //    _refreshTokenRepository.Add(refreshToken);
-
-        //    otp.MarkAsUsed();
-
-        //    await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-        //    return CreateAuthResponse(user, userProfile, refreshToken.Token);
-        //}
 
         public async Task<AuthResponseDto> Handle(VerifyOtpCommand request, CancellationToken cancellationToken)
         {
@@ -87,7 +62,8 @@ namespace BarberFlow.Application.Features.Auth.Commands.VerifyOtp
             var refreshToken = CreateRefreshToken(
                 user,
                 userProfile,
-                request.DeviceId);
+                request.DeviceId,
+                out var refreshTokenValue);
 
             _refreshTokenRepository.Add(refreshToken);
 
@@ -99,26 +75,8 @@ namespace BarberFlow.Application.Features.Auth.Commands.VerifyOtp
             return CreateAuthResponse(
                 user,
                 userProfile,
-                refreshToken.Token);
+                refreshTokenValue);
         }
-
-        //private static string ValidateRequest(VerifyOtpCommand request)
-        //{
-        //    var normalizedPhone = PhoneNumberValidator.NormalizeAndValidate(request.PhoneNumber);
-
-        //    if (string.IsNullOrWhiteSpace(request.Code) ||
-        //        !Regex.IsMatch(request.Code, @"^\d{4,8}$"))
-        //    {
-        //        throw new ValidationException("Invalid OTP format");
-        //    }
-
-        //    if (string.IsNullOrWhiteSpace(request.DeviceId))
-        //    {
-        //        throw new ValidationException("DeviceId is required");
-        //    }
-
-        //    return normalizedPhone;
-        //}
 
         private static void ValidateRequest(VerifyOtpCommand request)
         {
@@ -127,43 +85,12 @@ namespace BarberFlow.Application.Features.Auth.Commands.VerifyOtp
 
             if (string.IsNullOrWhiteSpace(request.DeviceId))
                 throw new ValidationException("DeviceId is required.");
+
         }
 
-        //private async Task<User> GetUserAsync(string phoneNumber, CancellationToken cancellationToken)
-        //{
-        //    var user = await _userRepository.GetByPhoneNumberAsync(phoneNumber, cancellationToken);
-
-        //    if (user == null || !user.IsActive)
-        //        throw new InvalidCredentialsException();
-
-        //    return user;
-        //}
-
-    //    private async Task<OtpCode> GetValidOtpAsync(User user, string codeHash, CancellationToken cancellationToken)
-    //    {
-    //        //var otp = await _otpCodeRepository.GetLastValidOtpAsync(user.Id, cancellationToken);
-    //        var otp = await _otpCodeRepository.GetByIdAsync(
-    //request.OtpId,
-    //cancellationToken);
-    //        if (otp == null)
-    //            throw new InvalidCredentialsException();
-
-    //        if (otp.IsBlocked(AuthenticationSettings.OtpMaxAttempts))
-    //            throw new InvalidCredentialsException();
-
-    //        if (!otp.IsValid(codeHash, AuthenticationSettings.OtpMaxAttempts))
-    //        {
-    //            otp.IncrementFailedAttempts();
-
-    //            await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-    //            throw new InvalidCredentialsException();
-    //        }
-
-    //        return otp;
-    //    }
-
-        private async Task<UserProfile> GetUserProfileAsync(OtpCode otp, CancellationToken cancellationToken)
+        private async Task<UserProfile> GetUserProfileAsync(
+            OtpCode otp,
+            CancellationToken cancellationToken)
         {
             if (!otp.RequestedUserProfileId.HasValue)
                 throw new InvalidCredentialsException();
@@ -177,7 +104,10 @@ namespace BarberFlow.Application.Features.Auth.Commands.VerifyOtp
             return profile;
         }
 
-        private async Task RevokeRefreshTokensAsync(Guid userId, string deviceId, CancellationToken cancellationToken)
+        private async Task RevokeRefreshTokensAsync(
+            Guid userId,
+            string deviceId,
+            CancellationToken cancellationToken)
         {
             var activeTokens = await _refreshTokenRepository
                 .GetActiveByUserIdAsync(userId, cancellationToken);
@@ -190,21 +120,28 @@ namespace BarberFlow.Application.Features.Auth.Commands.VerifyOtp
             }
         }
 
-        private RefreshToken CreateRefreshToken(User user, UserProfile userProfile, string deviceId)
+        private RefreshToken CreateRefreshToken(
+            User user,
+            UserProfile userProfile,
+            string deviceId,
+            out string refreshTokenValue)
         {
-            var refreshTokenValue = _jwtService.GenerateRefreshToken();
+            refreshTokenValue = _jwtService.GenerateRefreshToken();
 
-            var encryptedRefreshToken = _tokenEncryptionService.Encrypt(refreshTokenValue);
+            var refreshTokenHash = Sha256Hasher.Hash(refreshTokenValue);
 
             return RefreshToken.Create(
                 user.Id,
                 userProfile.Id,
-                encryptedRefreshToken,
+                refreshTokenHash,
                 DateTime.UtcNow.AddDays(AuthenticationSettings.RefreshTokenExpirationDays),
                 deviceId);
         }
 
-        private AuthResponseDto CreateAuthResponse(User user, UserProfile userProfile, string refreshToken)
+        private AuthResponseDto CreateAuthResponse(
+            User user,
+            UserProfile userProfile,
+            string refreshToken)
         {
             var accessToken = _jwtService.GenerateAccessToken(user, userProfile);
             var accessTokenExpiration = _jwtService.GetAccessTokenExpiration();
@@ -215,18 +152,11 @@ namespace BarberFlow.Application.Features.Auth.Commands.VerifyOtp
                 RefreshToken = refreshToken,
                 AccessTokenExpiration = accessTokenExpiration
             };
-
-            //return new AuthResponseDto
-            //{
-            //    AccessToken = _jwtService.GenerateAccessToken(user, userProfile),
-            //    RefreshToken = refreshToken,
-            //    AccessTokenExpiration = _jwtService.GetAccessTokenExpiration()
-            //};
         }
 
         private async Task<User> GetUserAsync(
-    Guid userId,
-    CancellationToken cancellationToken)
+            Guid userId,
+            CancellationToken cancellationToken)
         {
             var user = await _userRepository.GetByIdAsync(
                 userId,
@@ -239,8 +169,8 @@ namespace BarberFlow.Application.Features.Auth.Commands.VerifyOtp
         }
 
         private async Task<OtpCode> GetValidOtpAsync(
-    Guid otpId,
-    CancellationToken cancellationToken)
+            Guid otpId,
+            CancellationToken cancellationToken)
         {
             var otp = await _otpCodeRepository.GetByIdAsync(
                 otpId,
@@ -249,16 +179,13 @@ namespace BarberFlow.Application.Features.Auth.Commands.VerifyOtp
             if (otp == null)
                 throw new InvalidCredentialsException();
 
-            //if (!otp.IsActive)
-            //    throw new InvalidCredentialsException();
-
             if (otp.IsUsed)
                 throw new InvalidCredentialsException();
 
-            //if (otp.IsExpired())
-            //    throw new InvalidCredentialsException();
-
             if (otp.IsBlocked(AuthenticationSettings.OtpMaxAttempts))
+                throw new InvalidCredentialsException();
+
+            if (otp.ExpiresAt <= DateTime.UtcNow)
                 throw new InvalidCredentialsException();
 
             return otp;

@@ -46,7 +46,7 @@ namespace BarberFlow.Infrastructure.Services
             }
         }
 
-        public Guid RoleId
+        public int RoleId
         {
             get
             {
@@ -58,7 +58,7 @@ namespace BarberFlow.Infrastructure.Services
                 if (roleId == null)
                     throw new UnauthorizedException();
 
-                return Guid.Parse(roleId);
+                return int.Parse(roleId);
             }
         }
     }

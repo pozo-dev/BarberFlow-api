@@ -5,6 +5,7 @@ namespace BarberFlow.Api.Validation
 {
     public static class BarberShopImageValidator
     {
+        private const long MaxImageSizeBytes = 1 * 1024 * 1024;
         private static readonly HashSet<string> AllowedExtensions = new(StringComparer.OrdinalIgnoreCase)
         {
             ".jpg", ".jpeg", ".png", ".webp"
@@ -22,6 +23,9 @@ namespace BarberFlow.Api.Validation
         {
             if (file.Length == 0)
                 throw new ValidationException($"{fieldName} es requerido.");
+
+            if (file.Length > MaxImageSizeBytes)
+                throw new ValidationException($"{fieldName} no puede superar 1 MB.");
 
             var extension = Path.GetExtension(file.FileName);
 
