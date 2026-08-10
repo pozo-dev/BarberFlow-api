@@ -1,13 +1,11 @@
-﻿using BarberFlow.Application.Features.UserProfiles.RegisterUserProfile;
-using BarberFlow.Application.Features.Users.CreateUser;
+﻿using BarberFlow.Application.Features.Users.CreateUser;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 
 namespace BarberFlow.Api.Controllers
 {
     [ApiController]
-    [Route("api/users")]
+    [Route("api/auth/users")]
     public class UsersController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -19,16 +17,6 @@ namespace BarberFlow.Api.Controllers
 
         [HttpPost]
         public async Task<IActionResult> Create(CreateUserCommand command)
-        {
-            var id = await _mediator.Send(command);
-
-            return Ok(id);
-        }
-
-        [HttpPost("profiles")]
-        [Authorize]
-        public async Task<ActionResult<RegisterUserProfileResponseDto>> RegisterProfile(
-        RegisterUserProfileCommand command)
         {
             var response = await _mediator.Send(command);
 

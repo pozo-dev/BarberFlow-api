@@ -10,7 +10,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BarberFlow.Api.Controllers
 {
-    [ApiController, Route("api/[controller]"), Authorize]
+    [ApiController]
+    [Route("api/owner/collaborators")]
+    [Authorize]
     public class CollaboratorsController : ControllerBase
     {
         private readonly IMediator _mediator;

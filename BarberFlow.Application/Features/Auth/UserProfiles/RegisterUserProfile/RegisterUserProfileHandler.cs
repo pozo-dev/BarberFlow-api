@@ -5,7 +5,6 @@ using BarberFlow.Domain.Constants;
 using BarberFlow.Domain.Entities;
 using BarberFlow.Domain.Interfaces;
 using BarberFlow.Domain.Interfaces.Repositories;
-using BarberFlow.Application.Common.Interfaces;
 using MediatR;
 
 namespace BarberFlow.Application.Features.UserProfiles.RegisterUserProfile
@@ -17,29 +16,23 @@ namespace BarberFlow.Application.Features.UserProfiles.RegisterUserProfile
         private readonly IUserProfileRepository _userProfileRepository;
         private readonly IRoleRepository _roleRepository;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ICurrentUserService _currentUserService;
 
         public RegisterUserProfileHandler(
             IUserRepository userRepository,
             IUserProfileRepository userProfileRepository,
             IRoleRepository roleRepository,
-            IUnitOfWork unitOfWork,
-            ICurrentUserService currentUserService)
+            IUnitOfWork unitOfWork)
         {
             _userRepository = userRepository;
             _userProfileRepository = userProfileRepository;
             _roleRepository = roleRepository;
             _unitOfWork = unitOfWork;
-            _currentUserService = currentUserService;
         }
 
         public async Task<RegisterUserProfileResponseDto> Handle(
             RegisterUserProfileCommand request,
             CancellationToken cancellationToken)
         {
-            if (request.UserId != _currentUserService.UserId)
-                throw new ForbiddenAccessException();
-
             var user = await ValidateRequest(
                 request,
                 cancellationToken);

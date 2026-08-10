@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BarberFlow.Api.Controllers
 {
     [ApiController]
-    [Route("api/branches")]
+    [Route("api/owner/branches")]
     [Authorize]
     public class BranchesController : ControllerBase
     {

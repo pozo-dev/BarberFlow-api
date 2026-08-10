@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BarberFlow.Api.Controllers
 {
     [ApiController]
-    [Route("api/barbershop")]
+    [Route("api/owner/barbershop")]
     [Authorize]
     public class BarberShopController : ControllerBase
     {

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BarberFlow.Api.Controllers
 {
     [ApiController]
-    [Route("api/branches/{branchId:guid}/schedules")]
+    [Route("api/owner/branches/{branchId:guid}/schedules")]
     [Authorize]
     public class SchedulesController : ControllerBase
     {

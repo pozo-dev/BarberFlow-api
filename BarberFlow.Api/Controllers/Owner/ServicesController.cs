@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BarberFlow.Api.Controllers
 {
     [ApiController]
-    [Route("api/services")]
+    [Route("api/owner/services")]
     [Authorize]
     public class ServicesController : ControllerBase
     {
