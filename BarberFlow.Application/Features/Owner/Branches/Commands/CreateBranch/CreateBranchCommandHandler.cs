@@ -15,17 +15,20 @@ namespace BarberFlow.Application.Features.Branches.Commands.CreateBranch
         private readonly IUserProfileRepository _userProfileRepository;
         private readonly IBranchRepository _branchRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ILocationSearchRepository _locationSearchRepository;
 
         public CreateBranchCommandHandler(
             ICurrentUserService currentUserService,
             IUserProfileRepository userProfileRepository,
             IBranchRepository branchRepository,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            ILocationSearchRepository locationSearchRepository)
         {
             _currentUserService = currentUserService;
             _userProfileRepository = userProfileRepository;
             _branchRepository = branchRepository;
             _unitOfWork = unitOfWork;
+            _locationSearchRepository = locationSearchRepository;
         }
 
         public async Task<Guid> Handle(
@@ -55,11 +58,14 @@ namespace BarberFlow.Application.Features.Branches.Commands.CreateBranch
             if (exists)
                 throw new DuplicateBranchNameException(request.Name.Trim());
 
+            if (!await _locationSearchRepository.ExistsAsync(request.LocationSearchId, cancellationToken))
+                throw new ValidationException("La ubicación seleccionada no es válida.");
+
             var branch = Branch.Create(
                 profile.BarberShopId.Value,
                 request.Name,
                 request.Address,
-                request.City,
+                request.LocationSearchId,
                 request.PhoneNumber);
 
             await _branchRepository.AddAsync(

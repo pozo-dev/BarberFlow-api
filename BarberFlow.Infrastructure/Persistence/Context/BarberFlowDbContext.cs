@@ -22,6 +22,11 @@ namespace BarberFlow.Infrastructure.Persistence
         public DbSet<BarberAssignment> BarberAssignments { get; set; }
         public DbSet<BranchSchedule> BranchSchedules { get; set; }
         public DbSet<Collaborator> Collaborators { get; set; }
+        public DbSet<Country> Countries { get; set; }
+        public DbSet<CountryAdministrativeLevel> CountryAdministrativeLevels { get; set; }
+        public DbSet<AdministrativeArea> AdministrativeAreas { get; set; }
+        public DbSet<AdministrativeAreaType> AdministrativeAreaTypes { get; set; }
+        public DbSet<LocationSearch> LocationSearches { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

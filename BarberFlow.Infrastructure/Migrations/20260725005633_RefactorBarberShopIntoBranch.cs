@@ -10,6 +10,21 @@ namespace BarberFlow.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AddColumn<string>(
+                name: "City",
+                table: "Branches",
+                type: "nvarchar(120)",
+                maxLength: 120,
+                nullable: false,
+                defaultValue: "");
+
+            migrationBuilder.AddColumn<bool>(
+                name: "IsMain",
+                table: "Branches",
+                type: "bit",
+                nullable: false,
+                defaultValue: false);
+
             migrationBuilder.DropForeignKey(
                 name: "FK_Appointments_BarberShops_BarberShopId",
                 table: "Appointments");
@@ -36,6 +51,14 @@ namespace BarberFlow.Infrastructure.Migrations
                 principalTable: "BarberShops",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.DropColumn(
+                name: "City",
+                table: "Branches");
+
+            migrationBuilder.DropColumn(
+                name: "IsMain",
+                table: "Branches");
         }
     }
 }

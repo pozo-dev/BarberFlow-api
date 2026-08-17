@@ -37,7 +37,7 @@ namespace BarberFlow.Api.Controllers
                 Description = request.Description,
                 PhoneNumber = request.PhoneNumber,
                 Address = request.Address,
-                City = request.City,
+                LocationSearchId = request.LocationSearchId,
                 Logo = await BarberShopImageValidator.ReadAndValidateAsync(
                     request.Logo, "El logo", cancellationToken),
                 Banner = await BarberShopImageValidator.ReadAndValidateAsync(

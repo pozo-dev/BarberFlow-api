@@ -14,17 +14,20 @@ namespace BarberFlow.Application.Features.Branches.Commands.UpdateBranch
         private readonly ICurrentUserService _currentUserService;
         private readonly IUserProfileRepository _userProfileRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ILocationSearchRepository _locationSearchRepository;
 
         public UpdateBranchCommandHandler(
             IBranchRepository branchRepository,
             ICurrentUserService currentUserService,
             IUserProfileRepository userProfileRepository,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            ILocationSearchRepository locationSearchRepository)
         {
             _branchRepository = branchRepository;
             _currentUserService = currentUserService;
             _userProfileRepository = userProfileRepository;
             _unitOfWork = unitOfWork;
+            _locationSearchRepository = locationSearchRepository;
         }
 
         public async Task<UpdateBranchResponseDto> Handle(
@@ -53,12 +56,15 @@ namespace BarberFlow.Application.Features.Branches.Commands.UpdateBranch
             if (branch.BarberShopId != profile.BarberShopId)
                 throw new ForbiddenAccessException();
 
+            if (!await _locationSearchRepository.ExistsAsync(request.LocationSearchId, cancellationToken))
+                throw new ValidationException("La ubicación seleccionada no es válida.");
+
             try
             {
                 branch.Update(
                     request.Name,
                     request.Address,
-                    request.City,
+                    request.LocationSearchId,
                     request.PhoneNumber);
             }
             catch (ArgumentException exception)

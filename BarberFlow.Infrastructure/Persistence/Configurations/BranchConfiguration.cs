@@ -22,8 +22,10 @@ namespace BarberFlow.Infrastructure.Persistence.Configurations
                 .HasMaxLength(300)
                 .IsRequired();
 
-            builder.Property(x => x.City)
-                .HasMaxLength(120)
+            builder.HasOne(x => x.LocationSearch)
+                .WithMany()
+                .HasForeignKey(x => x.LocationSearchId)
+                .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();
 
             builder.Property(x => x.PhoneNumber)

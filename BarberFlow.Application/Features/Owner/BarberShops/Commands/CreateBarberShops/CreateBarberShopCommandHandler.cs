@@ -15,19 +15,22 @@ namespace BarberFlow.Application.Features.BarberShops.Commands.CreateBarberShop
         private readonly IUserProfileRepository _userProfileRepository;
         private readonly ICurrentUserService _currentUserService;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ILocationSearchRepository _locationSearchRepository;
 
         public CreateBarberShopCommandHandler(
             IBarberShopRepository barberShopRepository,
             IBranchRepository branchRepository,
             IUserProfileRepository userProfileRepository,
             ICurrentUserService currentUserService,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            ILocationSearchRepository locationSearchRepository)
         {
             _barberShopRepository = barberShopRepository;
             _branchRepository = branchRepository;
             _userProfileRepository = userProfileRepository;
             _currentUserService = currentUserService;
             _unitOfWork = unitOfWork;
+            _locationSearchRepository = locationSearchRepository;
         }
 
         public async Task<CreateBarberShopResponseDto> Handle(
@@ -35,6 +38,9 @@ namespace BarberFlow.Application.Features.BarberShops.Commands.CreateBarberShop
             CancellationToken cancellationToken)
         {
             ValidateImages(request.Logo, request.Banner);
+
+            if (!await _locationSearchRepository.ExistsAsync(request.LocationSearchId, cancellationToken))
+                throw new ValidationException("La ubicación seleccionada no es válida.");
 
             var ownerUserId = _currentUserService.UserId;
             var profileId = _currentUserService.ProfileId;
@@ -77,7 +83,7 @@ namespace BarberFlow.Application.Features.BarberShops.Commands.CreateBarberShop
                 barberShop.Id,
                 "Sucursal principal",
                 request.Address,
-                request.City,
+                request.LocationSearchId,
                 request.PhoneNumber,
                 true);
 

@@ -10,6 +10,25 @@ public interface IBarberShopRepository
             Guid ownerUserId,
             CancellationToken cancellationToken);
 
+    Task<IReadOnlyList<BarberShop>> SearchActiveAsync(
+        string? search,
+        string? city,
+        int skip,
+        int take,
+        CancellationToken cancellationToken);
+
+    Task<int> CountActiveAsync(
+        string? search,
+        string? city,
+        CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<string>> GetActiveCitiesAsync(
+        CancellationToken cancellationToken);
+
+    Task<BarberShop?> GetActiveWithDetailsAsync(
+        Guid id,
+        CancellationToken cancellationToken);
+
     void Add(
         BarberShop barberShop);
 

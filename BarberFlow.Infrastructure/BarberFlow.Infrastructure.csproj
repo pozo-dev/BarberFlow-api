@@ -36,4 +36,8 @@
     <Folder Include="Security\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="Catalogs\**\*.sql" />
+  </ItemGroup>
+
 </Project>

@@ -44,7 +44,8 @@ namespace BarberFlow.Application.Features.Branches.Queries.GetBranchById
                 Id = branch.Id,
                 Name = branch.Name,
                 Address = branch.Address,
-                City = branch.City,
+                LocationSearchId = branch.LocationSearchId,
+                LocationDisplayName = branch.LocationSearch.DisplayName,
                 PhoneNumber = branch.PhoneNumber,
                 IsMain = branch.IsMain,
                 IsActive = branch.IsActive

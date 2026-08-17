@@ -12,6 +12,44 @@ namespace BarberFlow.Infrastructure.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            // Keeps a database that stopped on the previous version of this migration
+            // consistent with the Branch schema before schedules are initialized.
+            migrationBuilder.Sql("""
+                IF COL_LENGTH(N'dbo.Branches', N'City') IS NULL
+                BEGIN
+                    ALTER TABLE dbo.Branches
+                    ADD City nvarchar(120) NOT NULL CONSTRAINT DF_Branches_City DEFAULT N'';
+                END;
+
+                IF COL_LENGTH(N'dbo.Branches', N'IsMain') IS NULL
+                BEGIN
+                    ALTER TABLE dbo.Branches
+                    ADD IsMain bit NOT NULL CONSTRAINT DF_Branches_IsMain DEFAULT CAST(0 AS bit);
+                END;
+                """);
+
+            migrationBuilder.CreateTable(
+                name: "BranchSchedules",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BranchId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DayOfWeek = table.Column<int>(type: "int", nullable: false),
+                    OpenTime = table.Column<TimeOnly>(type: "time", nullable: false),
+                    CloseTime = table.Column<TimeOnly>(type: "time", nullable: false),
+                    IsClosed = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BranchSchedules", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_BranchSchedules_Branches_BranchId",
+                        column: x => x.BranchId,
+                        principalTable: "Branches",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.Sql("""
                 ;WITH DuplicateSchedules AS
                 (
@@ -49,9 +87,8 @@ namespace BarberFlow.Infrastructure.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropIndex(
-                name: "IX_BranchSchedules_BranchId_DayOfWeek",
-                table: "BranchSchedules");
+            migrationBuilder.DropTable(
+                name: "BranchSchedules");
         }
     }
 }

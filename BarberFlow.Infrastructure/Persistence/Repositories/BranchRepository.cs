@@ -18,6 +18,7 @@ namespace BarberFlow.Infrastructure.Persistence.Repositories
             CancellationToken cancellationToken)
         {
             return await _context.Branches
+                .Include(x => x.LocationSearch)
                 .Where(x => x.BarberShopId == barberShopId)
                 .OrderBy(x => x.Name)
                 .ToListAsync(cancellationToken);
@@ -29,6 +30,7 @@ namespace BarberFlow.Infrastructure.Persistence.Repositories
         {
             return await _context.Branches
                 .Include(x => x.BarberShop)
+                .Include(x => x.LocationSearch)
                 .Include(x => x.Schedules)
                 .Include(x => x.BarberAssignments)
                 .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
@@ -40,6 +42,7 @@ namespace BarberFlow.Infrastructure.Persistence.Repositories
         {
             return await _context.Branches
                 .Include(x => x.Schedules)
+                .Include(x => x.LocationSearch)
                 .FirstOrDefaultAsync(
                     x => x.BarberShopId == barberShopId &&
                          x.IsMain,

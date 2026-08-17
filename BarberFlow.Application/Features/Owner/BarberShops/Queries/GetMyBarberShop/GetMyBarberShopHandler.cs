@@ -44,7 +44,8 @@ namespace BarberFlow.Application.Features.BarberShops.Queries.GetMyBarberShop
                 Banner = barberShop.Banner,
                 PhoneNumber = mainBranch?.PhoneNumber ?? string.Empty,
                 Address = mainBranch?.Address ?? string.Empty,
-                City = mainBranch?.City ?? string.Empty,
+                LocationSearchId = mainBranch?.LocationSearchId,
+                LocationDisplayName = mainBranch?.LocationSearch?.DisplayName ?? string.Empty,
                 //OpenTime = barberShop.OpenTime,
                 //CloseTime = barberShop.CloseTime
             };

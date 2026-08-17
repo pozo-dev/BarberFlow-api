@@ -14,7 +14,7 @@
 
         public string Address { get; private set; } = string.Empty;
 
-        public string City { get; private set; } = string.Empty;
+        public int LocationSearchId { get; private set; }
 
         public string PhoneNumber { get; private set; } = string.Empty;
 
@@ -27,6 +27,8 @@
         public DateTime? UpdatedAt { get; private set; }
 
         public BarberShop BarberShop { get; private set; } = null!;
+
+        public LocationSearch LocationSearch { get; private set; } = null!;
 
         public ICollection<BranchSchedule> Schedules { get; private set; }
             = new List<BranchSchedule>();
@@ -42,7 +44,7 @@
             Guid barberShopId,
             string name,
             string address,
-            string city,
+            int locationSearchId,
             string phoneNumber,
             bool isMain)
         {
@@ -54,7 +56,7 @@
 
             Address = address.Trim();
 
-            City = city.Trim();
+            LocationSearchId = locationSearchId;
 
             PhoneNumber = phoneNumber.Trim();
 
@@ -71,7 +73,7 @@
             Guid barberShopId,
             string name,
             string address,
-            string city,
+            int locationSearchId,
             string phoneNumber,
             bool isMain = false)
         {
@@ -84,8 +86,8 @@
             if (string.IsNullOrWhiteSpace(address))
                 throw new ArgumentException("La dirección es requerida.");
 
-            if (string.IsNullOrWhiteSpace(city))
-                throw new ArgumentException("La ciudad es requerida.");
+            if (locationSearchId <= 0)
+                throw new ArgumentException("La ubicación es requerida.");
 
             if (string.IsNullOrWhiteSpace(phoneNumber))
                 throw new ArgumentException("El teléfono es requerido.");
@@ -94,7 +96,7 @@
                 barberShopId,
                 name,
                 address,
-                city,
+                locationSearchId,
                 phoneNumber,
                 isMain);
         }
@@ -102,14 +104,17 @@
         public void Update(
             string name,
             string address,
-            string city,
+            int locationSearchId,
             string phoneNumber)
         {
             Name = name.Trim();
 
             Address = address.Trim();
 
-            City = city.Trim();
+            if (locationSearchId <= 0)
+                throw new ArgumentException("La ubicación es requerida.");
+
+            LocationSearchId = locationSearchId;
 
             PhoneNumber = phoneNumber.Trim();
 

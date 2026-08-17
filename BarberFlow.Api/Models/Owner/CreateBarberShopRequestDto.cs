@@ -13,7 +13,7 @@ namespace BarberFlow.Api.Models
 
         public string Address { get; set; } = string.Empty;
 
-        public string City { get; set; } = string.Empty;
+        public int LocationSearchId { get; set; }
         [Required]
         public IFormFile Logo { get; set; } = null!;
 
