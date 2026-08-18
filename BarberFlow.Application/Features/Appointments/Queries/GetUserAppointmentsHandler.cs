@@ -23,7 +23,8 @@ namespace BarberFlow.Application.Features.Appointments.Queries
             return appointments.Select(a => new AppointmentDto
             {
                 Id = a.Id,
-                BarberShopId = a.BarberShopId,
+                BranchId = a.BranchId,
+                ProfessionalId = a.CollaboratorId,
                 UserId = a.UserId,
                 StartDateTime = a.StartDateTime,
                 EndDateTime = a.EndDateTime,

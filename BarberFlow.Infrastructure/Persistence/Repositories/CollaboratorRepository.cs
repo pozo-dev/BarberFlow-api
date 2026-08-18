@@ -21,6 +21,13 @@ namespace BarberFlow.Infrastructure.Persistence.Repositories
                 .Include(x => x.Branch)
                 .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
+        public Task<List<Collaborator>> GetActiveByBranchIdAsync(Guid branchId, CancellationToken cancellationToken) =>
+            _context.Collaborators
+                .AsNoTracking()
+                .Where(x => x.BranchId == branchId && x.IsActive)
+                .OrderBy(x => x.FullName)
+                .ToListAsync(cancellationToken);
+
         public async Task AddAsync(Collaborator collaborator, CancellationToken cancellationToken)
         {
             await _context.Collaborators.AddAsync(collaborator, cancellationToken);

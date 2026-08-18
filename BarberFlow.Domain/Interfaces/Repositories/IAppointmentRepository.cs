@@ -6,19 +6,10 @@ namespace BarberFlow.Domain.Interfaces.Repositories
     {
         void Add(Appointment appointment);
         Task<Appointment?> GetByIdAsync(Guid appointmentId, CancellationToken cancellationToken);
-
-        // Nuevo: Verifica si existe un solapamiento de citas en la barbería para el rango dado
-        Task<bool> ExistsOverlappingAppointmentAsync(Guid barberShopId, DateTime start, DateTime end, CancellationToken cancellationToken);
-
-        // Nuevo: Agrega un servicio a una cita
-        //void AddAppointmentService(AppointmentService appointmentService);
-
-        // Nuevo: Obtiene todas las citas de un usuario
+        Task<bool> ExistsOverlappingAppointmentAsync(Guid branchId, Guid collaboratorId, DateTime start, DateTime end, CancellationToken cancellationToken);
         Task<List<Appointment>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken);
-
-        // Nuevo: Obtiene todas las citas de una barbería
         Task<List<Appointment>> GetByBarberShopIdAsync(Guid barberShopId, CancellationToken cancellationToken);
-
-        // (Opcional) Otros métodos que ya tengas definidos...
+        Task<List<Appointment>> GetByBranchAndDateAsync(Guid branchId, DateOnly date, CancellationToken cancellationToken);
+        Task<List<Appointment>> GetByBranchAndDateRangeAsync(Guid branchId, DateOnly from, DateOnly to, CancellationToken cancellationToken);
     }
 }

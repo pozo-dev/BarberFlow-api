@@ -17,7 +17,10 @@ namespace BarberFlow.Infrastructure.Persistence.Configurations
             builder.Property(x => x.UserId)
                 .IsRequired();
 
-            builder.Property(x => x.BarberShopId)
+            builder.Property(x => x.BranchId)
+                .IsRequired();
+
+            builder.Property(x => x.CollaboratorId)
                 .IsRequired();
 
             builder.Property(x => x.StartDateTime)
@@ -32,12 +35,20 @@ namespace BarberFlow.Infrastructure.Persistence.Configurations
             builder.Property(x => x.CreatedAt)
                 .IsRequired();
 
-            // Appointment -> BarberShop
+            // Appointment -> Branch
             builder
-                .HasOne(x => x.BarberShop)
+                .HasOne(x => x.Branch)
                 .WithMany(x => x.Appointments)
-                .HasForeignKey(x => x.BarberShopId)
+                .HasForeignKey(x => x.BranchId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            builder
+                .HasOne(x => x.Collaborator)
+                .WithMany()
+                .HasForeignKey(x => x.CollaboratorId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasIndex(x => new { x.BranchId, x.CollaboratorId, x.StartDateTime });
 
             // Appointment -> AppointmentServices
             builder

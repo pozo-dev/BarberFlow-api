@@ -22,15 +22,12 @@
 
         public ICollection<UserProfile> Barbers { get; private set; }
 
-        public ICollection<Appointment> Appointments { get; private set; }
-
         public ICollection<Branch> Branches { get; private set; }
 
         private BarberShop()
         {
             Services = new List<Service>();
             Barbers = new List<UserProfile>();
-            Appointments = new List<Appointment>();
             Branches = new List<Branch>();
         }
 
@@ -59,7 +56,6 @@
 
             Services = new List<Service>();
             Barbers = new List<UserProfile>();
-            Appointments = new List<Appointment>();
             Branches = new List<Branch>();
         }
 

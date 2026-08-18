@@ -14,50 +14,56 @@ namespace BarberFlow.Infrastructure.Persistence.Repositories
             _context = context;
         }
 
-        public void Add(Appointment appointment)
-        {
-            _context.Appointments.Add(appointment);
-        }
+        public void Add(Appointment appointment) => _context.Appointments.Add(appointment);
 
-        public Task<Appointment?> GetByIdAsync(Guid appointmentId, CancellationToken cancellationToken)
-        {
-            return _context.Appointments
-                .AsNoTracking()
-                .Include(a => a.AppointmentServices) // Si tienes navegación
+        public Task<Appointment?> GetByIdAsync(Guid appointmentId, CancellationToken cancellationToken) =>
+            _context.Appointments
+                .Include(a => a.AppointmentServices)
                 .FirstOrDefaultAsync(a => a.Id == appointmentId, cancellationToken);
-        }
 
-        public Task<bool> ExistsOverlappingAppointmentAsync(Guid barberShopId, DateTime start, DateTime end, CancellationToken cancellationToken)
-        {
-            return _context.Appointments
+        public Task<bool> ExistsOverlappingAppointmentAsync(Guid branchId, Guid collaboratorId, DateTime start, DateTime end, CancellationToken cancellationToken) =>
+            _context.Appointments
                 .AsNoTracking()
                 .AnyAsync(a =>
-                    a.BarberShopId == barberShopId &&
+                    a.BranchId == branchId &&
+                    a.CollaboratorId == collaboratorId &&
                     a.Status != AppointmentStatus.Cancelled &&
-                    (
-                        (start < a.EndDateTime && end > a.StartDateTime)
-                    ), cancellationToken
-                );
-        }
+                    start < a.EndDateTime && end > a.StartDateTime,
+                    cancellationToken);
 
-        //public void AddAppointmentService(AppointmentService appointmentService)
-        //{
-        //    _context.AppointmentServices.Add(appointmentService);
-        //}
-
-        public Task<List<Appointment>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken)
-        {
-            return _context.Appointments
+        public Task<List<Appointment>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken) =>
+            _context.Appointments
+                .AsNoTracking()
                 .Where(a => a.UserId == userId)
-                .Include(a => a.AppointmentServices) // Si tienes navegación
+                .Include(a => a.Branch)
+                .Include(a => a.AppointmentServices)
+                .ToListAsync(cancellationToken);
+
+        public Task<List<Appointment>> GetByBarberShopIdAsync(Guid barberShopId, CancellationToken cancellationToken) =>
+            _context.Appointments
+                .AsNoTracking()
+                .Where(a => a.Branch.BarberShopId == barberShopId)
+                .Include(a => a.Branch)
+                .Include(a => a.AppointmentServices)
+                .ToListAsync(cancellationToken);
+
+        public Task<List<Appointment>> GetByBranchAndDateAsync(Guid branchId, DateOnly date, CancellationToken cancellationToken)
+        {
+            var start = date.ToDateTime(TimeOnly.MinValue);
+            var end = start.AddDays(1);
+            return _context.Appointments
+                .AsNoTracking()
+                .Where(a => a.BranchId == branchId && a.StartDateTime >= start && a.StartDateTime < end && a.Status != AppointmentStatus.Cancelled)
                 .ToListAsync(cancellationToken);
         }
 
-        public Task<List<Appointment>> GetByBarberShopIdAsync(Guid barberShopId, CancellationToken cancellationToken)
+        public Task<List<Appointment>> GetByBranchAndDateRangeAsync(Guid branchId, DateOnly from, DateOnly to, CancellationToken cancellationToken)
         {
+            var start = from.ToDateTime(TimeOnly.MinValue);
+            var end = to.AddDays(1).ToDateTime(TimeOnly.MinValue);
             return _context.Appointments
-                .Where(a => a.BarberShopId == barberShopId)
-                .Include(a => a.AppointmentServices) // Si tienes navegación
+                .AsNoTracking()
+                .Where(a => a.BranchId == branchId && a.StartDateTime >= start && a.StartDateTime < end && a.Status != AppointmentStatus.Cancelled)
                 .ToListAsync(cancellationToken);
         }
     }

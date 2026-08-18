@@ -45,7 +45,6 @@ namespace BarberFlow.Infrastructure.Persistence.Repositories
             return await BuildActiveSearchQuery(search, city)
                 .Include(shop => shop.Branches.Where(branch => branch.IsActive))
                     .ThenInclude(branch => branch.LocationSearch)
-                .Include(shop => shop.Services.Where(service => service.IsActive))
                 .OrderBy(shop => shop.Name)
                 .Skip(skip)
                 .Take(take)
@@ -108,7 +107,6 @@ namespace BarberFlow.Infrastructure.Persistence.Repositories
                     .ThenInclude(branch => branch.Schedules)
                 .Include(shop => shop.Branches.Where(branch => branch.IsActive))
                     .ThenInclude(branch => branch.LocationSearch)
-                .Include(shop => shop.Services.Where(service => service.IsActive))
                 .FirstOrDefaultAsync(cancellationToken);
         }
 

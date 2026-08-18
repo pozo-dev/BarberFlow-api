@@ -1,0 +1,74 @@
+using BarberFlow.Domain.Interfaces.Repositories;
+using MediatR;
+
+namespace BarberFlow.Application.Features.Client.Appointments.Queries.GetAppointmentAvailability;
+
+public sealed record GetAppointmentAvailabilityQuery(Guid BranchId, DateOnly Date, IReadOnlyCollection<Guid> ServiceIds, Guid? ProfessionalId) : IRequest<ClientAppointmentAvailabilityDto>;
+
+public sealed class GetAppointmentAvailabilityHandler : IRequestHandler<GetAppointmentAvailabilityQuery, ClientAppointmentAvailabilityDto>
+{
+    private readonly IBranchRepository _branches;
+    private readonly IServiceRepository _services;
+    private readonly ICollaboratorRepository _collaborators;
+    private readonly IAppointmentRepository _appointments;
+
+    public GetAppointmentAvailabilityHandler(IBranchRepository branches, IServiceRepository services, ICollaboratorRepository collaborators, IAppointmentRepository appointments)
+    {
+        _branches = branches;
+        _services = services;
+        _collaborators = collaborators;
+        _appointments = appointments;
+    }
+
+    public async Task<ClientAppointmentAvailabilityDto> Handle(GetAppointmentAvailabilityQuery request, CancellationToken cancellationToken)
+    {
+        var result = new ClientAppointmentAvailabilityDto { BranchId = request.BranchId, Date = request.Date };
+        var branch = await _branches.GetByIdAsync(request.BranchId, cancellationToken);
+        if (branch is null || !branch.IsActive || request.ServiceIds.Count == 0) return result;
+        var requestedServiceIds = request.ServiceIds.Distinct().ToHashSet();
+        var services = (await _services.GetByBarberShopIdAsync(branch.BarberShopId, cancellationToken))
+            .Where(x => requestedServiceIds.Contains(x.Id))
+            .ToList();
+        if (services.Count != requestedServiceIds.Count || services.Any(x => !x.IsActive)) return result;
+        var schedule = branch.Schedules.SingleOrDefault(x => x.DayOfWeek == AppointmentAvailabilityRules.ScheduleDayOfWeek(request.Date));
+        if (schedule is null || schedule.IsClosed) return result;
+        var duration = TimeSpan.FromTicks(services.Sum(x => x.Duration.Ticks));
+        var professionals = await _collaborators.GetActiveByBranchIdAsync(branch.Id, cancellationToken);
+        var candidates = professionals.Where(x => !request.ProfessionalId.HasValue || x.Id == request.ProfessionalId.Value).Select(x => x.Id).ToList();
+        var booked = await _appointments.GetByBranchAndDateAsync(branch.Id, request.Date, cancellationToken);
+        result.Slots.AddRange(AppointmentAvailabilityRules.GetAvailableSlots(request.Date, schedule.OpenTime, schedule.CloseTime, duration, candidates, booked));
+        return result;
+    }
+}
+
+internal static class AppointmentAvailabilityRules
+{
+    internal static DayOfWeek ScheduleDayOfWeek(DateOnly date) =>
+        (DayOfWeek)(((int)date.DayOfWeek + 6) % 7);
+
+    internal static List<DateTime> GetAvailableSlots(
+        DateOnly date,
+        TimeOnly openTime,
+        TimeOnly closeTime,
+        TimeSpan duration,
+        IReadOnlyCollection<Guid> candidateIds,
+        IReadOnlyCollection<BarberFlow.Domain.Entities.Appointment> booked)
+    {
+        var slots = new List<DateTime>();
+        for (var slot = date.ToDateTime(openTime); slot.Add(duration).TimeOfDay <= closeTime.ToTimeSpan(); slot = slot.AddMinutes(30))
+        {
+            if (slot <= DateTime.Now) continue;
+            var end = slot.Add(duration);
+            if (candidateIds.Any(id => !booked.Any(appointment => appointment.CollaboratorId == id && slot < appointment.EndDateTime && end > appointment.StartDateTime)))
+                slots.Add(slot);
+        }
+        return slots;
+    }
+}
+
+public sealed class ClientAppointmentAvailabilityDto
+{
+    public Guid BranchId { get; init; }
+    public DateOnly Date { get; init; }
+    public List<DateTime> Slots { get; init; } = new();
+}

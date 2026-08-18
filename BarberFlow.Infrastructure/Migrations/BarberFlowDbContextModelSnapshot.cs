@@ -97,7 +97,10 @@ namespace BarberFlow.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("BarberShopId")
+                    b.Property<Guid>("CollaboratorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BranchId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
@@ -117,7 +120,11 @@ namespace BarberFlow.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BarberShopId");
+                    b.HasIndex("CollaboratorId");
+
+                    b.HasIndex("BranchId");
+
+                    b.HasIndex("BranchId", "CollaboratorId", "StartDateTime");
 
                     b.HasIndex("UserId");
 
@@ -698,9 +705,15 @@ namespace BarberFlow.Infrastructure.Migrations
 
             modelBuilder.Entity("BarberFlow.Domain.Entities.Appointment", b =>
                 {
-                    b.HasOne("BarberFlow.Domain.Entities.BarberShop", "BarberShop")
+                    b.HasOne("BarberFlow.Domain.Entities.Collaborator", "Collaborator")
+                        .WithMany()
+                        .HasForeignKey("CollaboratorId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("BarberFlow.Domain.Entities.Branch", "Branch")
                         .WithMany("Appointments")
-                        .HasForeignKey("BarberShopId")
+                        .HasForeignKey("BranchId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
@@ -710,7 +723,9 @@ namespace BarberFlow.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("BarberShop");
+                    b.Navigation("Collaborator");
+
+                    b.Navigation("Branch");
 
                     b.Navigation("User");
                 });
@@ -913,8 +928,6 @@ namespace BarberFlow.Infrastructure.Migrations
 
             modelBuilder.Entity("BarberFlow.Domain.Entities.BarberShop", b =>
                 {
-                    b.Navigation("Appointments");
-
                     b.Navigation("Barbers");
 
                     b.Navigation("Branches");
@@ -924,6 +937,8 @@ namespace BarberFlow.Infrastructure.Migrations
 
             modelBuilder.Entity("BarberFlow.Domain.Entities.Branch", b =>
                 {
+                    b.Navigation("Appointments");
+
                     b.Navigation("BarberAssignments");
 
                     b.Navigation("Schedules");

@@ -36,6 +36,9 @@
         public ICollection<BarberAssignment> BarberAssignments { get; private set; }
             = new List<BarberAssignment>();
 
+        public ICollection<Appointment> Appointments { get; private set; }
+            = new List<Appointment>();
+
         private Branch()
         {
         }

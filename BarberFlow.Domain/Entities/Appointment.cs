@@ -1,5 +1,4 @@
 ﻿using BarberFlow.Domain.Enums;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace BarberFlow.Domain.Entities
 {
@@ -7,13 +6,15 @@ namespace BarberFlow.Domain.Entities
     {
         public Guid Id { get; private set; }
         public Guid UserId { get; private set; }
-        public Guid BarberShopId { get; private set; }
+        public Guid BranchId { get; private set; }
+        public Guid CollaboratorId { get; private set; }
         public DateTime StartDateTime { get; private set; }
         public DateTime EndDateTime { get; private set; }
         public AppointmentStatus Status { get; private set; }
         public DateTime CreatedAt { get; private set; }
         public User User { get; private set; }
-        public BarberShop BarberShop { get; private set; }
+        public Branch Branch { get; private set; } = null!;
+        public Collaborator Collaborator { get; private set; } = null!;
         public ICollection<AppointmentService> AppointmentServices { get; private set; }
 
         private Appointment()
@@ -21,11 +22,12 @@ namespace BarberFlow.Domain.Entities
             AppointmentServices = new List<AppointmentService>();
         }
 
-        public Appointment(Guid userId, Guid barberShopId, DateTime start, DateTime end)
+        public Appointment(Guid userId, Guid branchId, Guid collaboratorId, DateTime start, DateTime end)
         {
             Id = Guid.NewGuid();
             UserId = userId;
-            BarberShopId = barberShopId;
+            BranchId = branchId;
+            CollaboratorId = collaboratorId;
             StartDateTime = start;
             EndDateTime = end;
             Status = AppointmentStatus.Scheduled;
