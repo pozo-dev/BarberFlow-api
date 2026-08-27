@@ -5,15 +5,15 @@
         public Guid Id { get; private set; }
         public Guid ServiceId { get; private set; }
         public decimal Price { get; private set; }
-        public DateTime EffectiveFrom { get; private set; }
-        public DateTime CreatedAt { get; private set; }
+        public DateTimeOffset EffectiveFrom { get; private set; }
+        public DateTimeOffset CreatedAt { get; private set; }
         public bool IsCurrent { get; private set; }
 
         public Service Service { get; private set; } = null!;
 
         private ServicePrice() { } // EF
 
-        public static ServicePrice Create(Guid serviceId, decimal price, DateTime effectiveFrom)
+        public static ServicePrice Create(Guid serviceId, decimal price, DateTimeOffset effectiveFrom)
         {
             if (price <= 0)
                 throw new ArgumentException("Price must be greater than zero.");
@@ -24,13 +24,13 @@
             return new ServicePrice(serviceId, price, effectiveFrom);
         }
 
-        private ServicePrice(Guid serviceId, decimal price, DateTime effectiveFrom)
+        private ServicePrice(Guid serviceId, decimal price, DateTimeOffset effectiveFrom)
         {
             Id = Guid.NewGuid();
             ServiceId = serviceId;
             Price = price;
             EffectiveFrom = effectiveFrom;
-            CreatedAt = DateTime.UtcNow;
+            CreatedAt = DateTimeOffset.UtcNow;
             IsCurrent = true;
         }
 

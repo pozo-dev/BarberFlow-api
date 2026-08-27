@@ -51,6 +51,8 @@ namespace BarberFlow.Api.Middlewares
 
                 DuplicateBranchNameException => StatusCodes.Status409Conflict,
 
+                AppointmentConflictException => StatusCodes.Status409Conflict,
+
                 UserNotActiveException => StatusCodes.Status401Unauthorized,
 
                 InvalidCredentialsException => StatusCodes.Status401Unauthorized,

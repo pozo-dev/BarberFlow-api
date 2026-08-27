@@ -21,7 +21,7 @@ namespace BarberFlow.Infrastructure.Persistence.Repositories
                 .Include(a => a.AppointmentServices)
                 .FirstOrDefaultAsync(a => a.Id == appointmentId, cancellationToken);
 
-        public Task<bool> ExistsOverlappingAppointmentAsync(Guid branchId, Guid collaboratorId, DateTime start, DateTime end, CancellationToken cancellationToken) =>
+        public Task<bool> ExistsOverlappingAppointmentAsync(Guid branchId, Guid collaboratorId, DateTimeOffset start, DateTimeOffset end, CancellationToken cancellationToken) =>
             _context.Appointments
                 .AsNoTracking()
                 .AnyAsync(a =>
@@ -47,23 +47,11 @@ namespace BarberFlow.Infrastructure.Persistence.Repositories
                 .Include(a => a.AppointmentServices)
                 .ToListAsync(cancellationToken);
 
-        public Task<List<Appointment>> GetByBranchAndDateAsync(Guid branchId, DateOnly date, CancellationToken cancellationToken)
+        public Task<List<Appointment>> GetByBranchAndRangeAsync(Guid branchId, DateTimeOffset fromUtc, DateTimeOffset toUtc, CancellationToken cancellationToken)
         {
-            var start = date.ToDateTime(TimeOnly.MinValue);
-            var end = start.AddDays(1);
             return _context.Appointments
                 .AsNoTracking()
-                .Where(a => a.BranchId == branchId && a.StartDateTime >= start && a.StartDateTime < end && a.Status != AppointmentStatus.Cancelled)
-                .ToListAsync(cancellationToken);
-        }
-
-        public Task<List<Appointment>> GetByBranchAndDateRangeAsync(Guid branchId, DateOnly from, DateOnly to, CancellationToken cancellationToken)
-        {
-            var start = from.ToDateTime(TimeOnly.MinValue);
-            var end = to.AddDays(1).ToDateTime(TimeOnly.MinValue);
-            return _context.Appointments
-                .AsNoTracking()
-                .Where(a => a.BranchId == branchId && a.StartDateTime >= start && a.StartDateTime < end && a.Status != AppointmentStatus.Cancelled)
+                .Where(a => a.BranchId == branchId && a.StartDateTime >= fromUtc && a.StartDateTime < toUtc && a.Status != AppointmentStatus.Cancelled)
                 .ToListAsync(cancellationToken);
         }
     }

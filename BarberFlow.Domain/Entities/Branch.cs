@@ -22,9 +22,13 @@
 
         public bool IsActive { get; private set; }
 
-        public DateTime CreatedAt { get; private set; }
+        public DateTimeOffset CreatedAt { get; private set; }
 
-        public DateTime? UpdatedAt { get; private set; }
+        public DateTimeOffset? UpdatedAt { get; private set; }
+
+        // IANA identifier. It keeps commercial schedules independent from the
+        // timezone configured on a customer's device or on the API host.
+        public string TimeZoneId { get; private set; } = "America/Managua";
 
         public BarberShop BarberShop { get; private set; } = null!;
 
@@ -67,7 +71,7 @@
 
             IsActive = true;
 
-            CreatedAt = DateTime.UtcNow;
+            CreatedAt = DateTimeOffset.UtcNow;
 
             InitializeDefaultSchedules();
         }
@@ -121,7 +125,7 @@
 
             PhoneNumber = phoneNumber.Trim();
 
-            UpdatedAt = DateTime.UtcNow;
+            UpdatedAt = DateTimeOffset.UtcNow;
         }
 
         public void UpdateSchedules(IReadOnlyCollection<BranchScheduleUpdate> schedules)
@@ -155,7 +159,7 @@
                     schedule.IsClosed);
             }
 
-            UpdatedAt = DateTime.UtcNow;
+            UpdatedAt = DateTimeOffset.UtcNow;
         }
 
         private void InitializeDefaultSchedules()
@@ -173,25 +177,25 @@
         public void Activate()
         {
             IsActive = true;
-            UpdatedAt = DateTime.UtcNow;
+            UpdatedAt = DateTimeOffset.UtcNow;
         }
 
         public void Deactivate()
         {
             IsActive = false;
-            UpdatedAt = DateTime.UtcNow;
+            UpdatedAt = DateTimeOffset.UtcNow;
         }
 
         public void SetAsMain()
         {
             IsMain = true;
-            UpdatedAt = DateTime.UtcNow;
+            UpdatedAt = DateTimeOffset.UtcNow;
         }
 
         public void RemoveMain()
         {
             IsMain = false;
-            UpdatedAt = DateTime.UtcNow;
+            UpdatedAt = DateTimeOffset.UtcNow;
         }
     }
 }

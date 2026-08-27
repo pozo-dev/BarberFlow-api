@@ -1,4 +1,5 @@
 using BarberFlow.Application.Common.Interfaces;
+using BarberFlow.Application.Common.Time;
 using BarberFlow.Application.Features.Appointments.DTOs;
 using BarberFlow.Application.Features.Appointments.Exceptions;
 using BarberFlow.Application.Features.Services.Exceptions;
@@ -38,7 +39,7 @@ namespace BarberFlow.Application.Features.Appointments.Commands
 
             var branch = await _branches.GetByIdAsync(input.BranchId, cancellationToken);
             if (branch is null || !branch.IsActive || !branch.BarberShop.IsActive)
-                throw new InvalidOperationException("La sucursal no está disponible.");
+                throw new InvalidOperationException("La sucursal no estï¿½ disponible.");
 
             var serviceIds = input.ServiceIds.Distinct().ToList();
             if (serviceIds.Count == 0) throw new AtLeastOneServiceRequiredException();
@@ -49,12 +50,17 @@ namespace BarberFlow.Application.Features.Appointments.Commands
             if (services.Count != serviceIds.Count || services.Any(x => !x.IsActive))
                 throw new ServiceNotFoundException();
 
+            if (input.StartDateTime.Offset != TimeSpan.Zero)
+                throw new ArgumentException("La fecha de la cita debe enviarse en UTC.");
+
+            var localStart = BranchTimeZone.ToBranchTime(input.StartDateTime, branch.TimeZoneId);
             var duration = TimeSpan.FromTicks(services.Sum(x => x.Duration.Ticks));
             var end = input.StartDateTime.Add(duration);
-            var scheduleDayOfWeek = (DayOfWeek)(((int)input.StartDateTime.DayOfWeek + 6) % 7);
+            var localEnd = BranchTimeZone.ToBranchTime(end, branch.TimeZoneId);
+            var scheduleDayOfWeek = (DayOfWeek)(((int)localStart.DayOfWeek + 6) % 7);
             var schedule = branch.Schedules.SingleOrDefault(x => x.DayOfWeek == scheduleDayOfWeek);
-            if (schedule is null || schedule.IsClosed || input.StartDateTime.TimeOfDay < schedule.OpenTime.ToTimeSpan() || end.TimeOfDay > schedule.CloseTime.ToTimeSpan())
-                throw new InvalidOperationException("La hora seleccionada no está disponible.");
+            if (schedule is null || schedule.IsClosed || localStart.TimeOfDay < schedule.OpenTime.ToTimeSpan() || localEnd.Date != localStart.Date || localEnd.TimeOfDay > schedule.CloseTime.ToTimeSpan())
+                throw new InvalidOperationException("La hora seleccionada no estï¿½ disponible.");
 
             var candidates = await _collaborators.GetActiveByBranchIdAsync(branch.Id, cancellationToken);
             var professionalIds = input.ProfessionalId.HasValue

@@ -14,8 +14,8 @@
         public bool IsActive { get; private set; }
         public int DisplayOrder { get; private set; }
 
-        public DateTime CreatedAt { get; private set; }
-        public DateTime? UpdatedAt { get; private set; }
+        public DateTimeOffset CreatedAt { get; private set; }
+        public DateTimeOffset? UpdatedAt { get; private set; }
 
         public BarberShop BarberShop { get; private set; } = null!;
 
@@ -37,7 +37,7 @@
             Duration = duration;
             DisplayOrder = displayOrder;
             IsActive = true;
-            CreatedAt = DateTime.UtcNow;
+            CreatedAt = DateTimeOffset.UtcNow;
         }
 
         public static Service Create(
@@ -96,19 +96,19 @@
             Price = price;
             Duration = duration;
             DisplayOrder = displayOrder;
-            UpdatedAt = DateTime.UtcNow;
+            UpdatedAt = DateTimeOffset.UtcNow;
         }
 
         public void Activate()
         {
             IsActive = true;
-            UpdatedAt = DateTime.UtcNow;
+            UpdatedAt = DateTimeOffset.UtcNow;
         }
 
         public void Deactivate()
         {
             IsActive = false;
-            UpdatedAt = DateTime.UtcNow;
+            UpdatedAt = DateTimeOffset.UtcNow;
         }
     }
 }

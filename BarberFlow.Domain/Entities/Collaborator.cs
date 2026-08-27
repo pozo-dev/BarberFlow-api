@@ -8,8 +8,8 @@ namespace BarberFlow.Domain.Entities
         public string PhoneNumber { get; private set; } = string.Empty;
         public int RoleId { get; private set; }
         public bool IsActive { get; private set; }
-        public DateTime CreatedAt { get; private set; }
-        public DateTime? UpdatedAt { get; private set; }
+        public DateTimeOffset CreatedAt { get; private set; }
+        public DateTimeOffset? UpdatedAt { get; private set; }
 
         public Branch Branch { get; private set; } = null!;
         public Role Role { get; private set; } = null!;
@@ -24,7 +24,7 @@ namespace BarberFlow.Domain.Entities
             PhoneNumber = phoneNumber.Trim();
             RoleId = roleId;
             IsActive = true;
-            CreatedAt = DateTime.UtcNow;
+            CreatedAt = DateTimeOffset.UtcNow;
         }
 
         public static Collaborator Create(Guid branchId, string fullName, string phoneNumber, int roleId)
@@ -45,19 +45,19 @@ namespace BarberFlow.Domain.Entities
             BranchId = branchId;
             FullName = fullName.Trim();
             PhoneNumber = phoneNumber.Trim();
-            UpdatedAt = DateTime.UtcNow;
+            UpdatedAt = DateTimeOffset.UtcNow;
         }
 
         public void Activate()
         {
             IsActive = true;
-            UpdatedAt = DateTime.UtcNow;
+            UpdatedAt = DateTimeOffset.UtcNow;
         }
 
         public void Deactivate()
         {
             IsActive = false;
-            UpdatedAt = DateTime.UtcNow;
+            UpdatedAt = DateTimeOffset.UtcNow;
         }
     }
 }

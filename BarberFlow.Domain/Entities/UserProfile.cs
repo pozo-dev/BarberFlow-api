@@ -10,7 +10,7 @@ namespace BarberFlow.Domain.Entities
         public int RoleId { get; private set; }
         public Guid? BarberShopId { get; private set; }
         public bool IsActive { get; private set; }
-        public DateTime CreatedAt { get; private set; }
+        public DateTimeOffset CreatedAt { get; private set; }
 
         public User User { get; private set; }
         public Role Role { get; private set; }
@@ -31,7 +31,7 @@ namespace BarberFlow.Domain.Entities
             RoleId = roleId;
             BarberShopId = barberShopId;
             IsActive = true;
-            CreatedAt = DateTime.UtcNow;
+            CreatedAt = DateTimeOffset.UtcNow;
             RefreshTokens = new List<RefreshToken>();
             BarberAssignments = new List<BarberAssignment>();
         }

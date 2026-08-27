@@ -29,11 +29,12 @@ public class JwtService : IJwtService
             new Claim("roleId", userProfile.RoleId.ToString())
         };
 
+        var expiration = DateTimeOffset.UtcNow.AddMinutes(_settings.ExpirationMinutes);
         var token = new JwtSecurityToken(
             issuer: _settings.Issuer,
             audience: _settings.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(_settings.ExpirationMinutes),
+            expires: expiration.UtcDateTime,
             signingCredentials: credentials
         );
 
@@ -45,8 +46,8 @@ public class JwtService : IJwtService
         return Convert.ToBase64String(Guid.NewGuid().ToByteArray());
     }
 
-    public DateTime GetAccessTokenExpiration()
+    public DateTimeOffset GetAccessTokenExpiration()
     {
-        return DateTime.UtcNow.AddMinutes(_settings.ExpirationMinutes);
+        return DateTimeOffset.UtcNow.AddMinutes(_settings.ExpirationMinutes);
     }
 }

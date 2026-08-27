@@ -21,13 +21,13 @@ namespace BarberFlow.Infrastructure.Persistence.Repositories
         public async Task<RefreshToken?> GetByTokenAsync(string token, CancellationToken cancellationToken)
         {
             return await _context.RefreshTokens
-                .FirstOrDefaultAsync(x => x.Token == token && x.RevokedAt == null && x.ExpiresAt > DateTime.UtcNow, cancellationToken);
+                .FirstOrDefaultAsync(x => x.Token == token && x.RevokedAt == null && x.ExpiresAt > DateTimeOffset.UtcNow, cancellationToken);
         }
 
         public async Task<List<RefreshToken>> GetActiveByUserIdAsync(Guid userId, CancellationToken cancellationToken)
         {
             return await _context.RefreshTokens
-                .Where(x => x.UserId == userId && x.RevokedAt == null && x.ExpiresAt > DateTime.UtcNow)
+                .Where(x => x.UserId == userId && x.RevokedAt == null && x.ExpiresAt > DateTimeOffset.UtcNow)
                 .ToListAsync(cancellationToken);
         }
 

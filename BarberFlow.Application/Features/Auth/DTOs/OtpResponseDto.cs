@@ -3,6 +3,6 @@
     public class OtpResponseDto
     {
         public Guid OtpId { get; set; }
-        public DateTime ExpiresAt { get; set; }
+        public DateTimeOffset ExpiresAt { get; set; }
     }
 }

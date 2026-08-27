@@ -1,3 +1,4 @@
+using BarberFlow.Application.Common.Time;
 using BarberFlow.Domain.Interfaces.Repositories;
 using MediatR;
 
@@ -35,8 +36,10 @@ public sealed class GetAppointmentAvailabilityHandler : IRequestHandler<GetAppoi
         var duration = TimeSpan.FromTicks(services.Sum(x => x.Duration.Ticks));
         var professionals = await _collaborators.GetActiveByBranchIdAsync(branch.Id, cancellationToken);
         var candidates = professionals.Where(x => !request.ProfessionalId.HasValue || x.Id == request.ProfessionalId.Value).Select(x => x.Id).ToList();
-        var booked = await _appointments.GetByBranchAndDateAsync(branch.Id, request.Date, cancellationToken);
-        result.Slots.AddRange(AppointmentAvailabilityRules.GetAvailableSlots(request.Date, schedule.OpenTime, schedule.CloseTime, duration, candidates, booked));
+        var dayStartUtc = BranchTimeZone.ToUtc(request.Date, branch.TimeZoneId);
+        var nextDayStartUtc = BranchTimeZone.ToUtc(request.Date.AddDays(1), branch.TimeZoneId);
+        var booked = await _appointments.GetByBranchAndRangeAsync(branch.Id, dayStartUtc, nextDayStartUtc, cancellationToken);
+        result.Slots.AddRange(AppointmentAvailabilityRules.GetAvailableSlots(request.Date, schedule.OpenTime, schedule.CloseTime, duration, candidates, booked, branch.TimeZoneId));
         return result;
     }
 }
@@ -46,21 +49,28 @@ internal static class AppointmentAvailabilityRules
     internal static DayOfWeek ScheduleDayOfWeek(DateOnly date) =>
         (DayOfWeek)(((int)date.DayOfWeek + 6) % 7);
 
-    internal static List<DateTime> GetAvailableSlots(
+    internal static List<ClientAppointmentAvailabilitySlotDto> GetAvailableSlots(
         DateOnly date,
         TimeOnly openTime,
         TimeOnly closeTime,
         TimeSpan duration,
         IReadOnlyCollection<Guid> candidateIds,
-        IReadOnlyCollection<BarberFlow.Domain.Entities.Appointment> booked)
+        IReadOnlyCollection<BarberFlow.Domain.Entities.Appointment> booked,
+        string? timeZoneId = null)
     {
-        var slots = new List<DateTime>();
+        var slots = new List<ClientAppointmentAvailabilitySlotDto>();
         for (var slot = date.ToDateTime(openTime); slot.Add(duration).TimeOfDay <= closeTime.ToTimeSpan(); slot = slot.AddMinutes(30))
         {
-            if (slot <= DateTime.Now) continue;
+            var startAtUtc = BranchTimeZone.ToUtc(DateOnly.FromDateTime(slot), TimeOnly.FromDateTime(slot), timeZoneId);
+            if (startAtUtc <= DateTimeOffset.UtcNow) continue;
             var end = slot.Add(duration);
-            if (candidateIds.Any(id => !booked.Any(appointment => appointment.CollaboratorId == id && slot < appointment.EndDateTime && end > appointment.StartDateTime)))
-                slots.Add(slot);
+            var endAtUtc = BranchTimeZone.ToUtc(DateOnly.FromDateTime(end), TimeOnly.FromDateTime(end), timeZoneId);
+            if (candidateIds.Any(id => !booked.Any(appointment => appointment.CollaboratorId == id && startAtUtc < appointment.EndDateTime && endAtUtc > appointment.StartDateTime)))
+                slots.Add(new ClientAppointmentAvailabilitySlotDto
+                {
+                    StartAtUtc = startAtUtc,
+                    DisplayTime = TimeOnly.FromDateTime(slot),
+                });
         }
         return slots;
     }
@@ -70,5 +80,11 @@ public sealed class ClientAppointmentAvailabilityDto
 {
     public Guid BranchId { get; init; }
     public DateOnly Date { get; init; }
-    public List<DateTime> Slots { get; init; } = new();
+    public List<ClientAppointmentAvailabilitySlotDto> Slots { get; init; } = new();
+}
+
+public sealed class ClientAppointmentAvailabilitySlotDto
+{
+    public DateTimeOffset StartAtUtc { get; init; }
+    public TimeOnly DisplayTime { get; init; }
 }

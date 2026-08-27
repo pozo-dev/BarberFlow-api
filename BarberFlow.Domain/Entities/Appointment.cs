@@ -8,10 +8,10 @@ namespace BarberFlow.Domain.Entities
         public Guid UserId { get; private set; }
         public Guid BranchId { get; private set; }
         public Guid CollaboratorId { get; private set; }
-        public DateTime StartDateTime { get; private set; }
-        public DateTime EndDateTime { get; private set; }
+        public DateTimeOffset StartDateTime { get; private set; }
+        public DateTimeOffset EndDateTime { get; private set; }
         public AppointmentStatus Status { get; private set; }
-        public DateTime CreatedAt { get; private set; }
+        public DateTimeOffset CreatedAt { get; private set; }
         public User User { get; private set; }
         public Branch Branch { get; private set; } = null!;
         public Collaborator Collaborator { get; private set; } = null!;
@@ -22,7 +22,7 @@ namespace BarberFlow.Domain.Entities
             AppointmentServices = new List<AppointmentService>();
         }
 
-        public Appointment(Guid userId, Guid branchId, Guid collaboratorId, DateTime start, DateTime end)
+        public Appointment(Guid userId, Guid branchId, Guid collaboratorId, DateTimeOffset start, DateTimeOffset end)
         {
             Id = Guid.NewGuid();
             UserId = userId;
@@ -31,7 +31,7 @@ namespace BarberFlow.Domain.Entities
             StartDateTime = start;
             EndDateTime = end;
             Status = AppointmentStatus.Scheduled;
-            CreatedAt = DateTime.UtcNow;
+            CreatedAt = DateTimeOffset.UtcNow;
             AppointmentServices = new List<AppointmentService>();
         }
 
@@ -41,7 +41,7 @@ namespace BarberFlow.Domain.Entities
 
         public bool CanBeCancelled()
         {
-            var isInFuture = StartDateTime > DateTime.UtcNow;
+            var isInFuture = StartDateTime > DateTimeOffset.UtcNow;
             return Status == AppointmentStatus.Scheduled && isInFuture;
         }
 

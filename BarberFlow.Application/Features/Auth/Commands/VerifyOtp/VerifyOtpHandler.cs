@@ -134,7 +134,7 @@ namespace BarberFlow.Application.Features.Auth.Commands.VerifyOtp
                 user.Id,
                 userProfile.Id,
                 refreshTokenHash,
-                DateTime.UtcNow.AddDays(AuthenticationSettings.RefreshTokenExpirationDays),
+                DateTimeOffset.UtcNow.AddDays(AuthenticationSettings.RefreshTokenExpirationDays),
                 deviceId);
         }
 
@@ -185,7 +185,7 @@ namespace BarberFlow.Application.Features.Auth.Commands.VerifyOtp
             if (otp.IsBlocked(AuthenticationSettings.OtpMaxAttempts))
                 throw new InvalidCredentialsException();
 
-            if (otp.ExpiresAt <= DateTime.UtcNow)
+            if (otp.ExpiresAt <= DateTimeOffset.UtcNow)
                 throw new InvalidCredentialsException();
 
             return otp;

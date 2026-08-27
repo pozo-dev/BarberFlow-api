@@ -32,6 +32,10 @@ namespace BarberFlow.Infrastructure.Persistence.Configurations
                 .HasMaxLength(20)
                 .IsRequired();
 
+            builder.Property(x => x.TimeZoneId)
+                .HasMaxLength(100)
+                .IsRequired();
+
             builder.Property(x => x.IsMain)
                 .IsRequired();
 

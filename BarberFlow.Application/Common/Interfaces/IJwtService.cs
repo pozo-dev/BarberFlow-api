@@ -6,6 +6,6 @@ namespace BarberFlow.Application.Common.Interfaces
     {
         string GenerateAccessToken(User user, UserProfile userProfile);
         string GenerateRefreshToken();
-        DateTime GetAccessTokenExpiration();
+        DateTimeOffset GetAccessTokenExpiration();
     }
 }

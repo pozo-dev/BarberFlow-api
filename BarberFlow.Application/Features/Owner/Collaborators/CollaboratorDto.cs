@@ -8,7 +8,7 @@ namespace BarberFlow.Application.Features.Collaborators
         public string PhoneNumber { get; set; } = string.Empty;
         public int RoleId { get; set; }
         public bool IsActive { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
+        public DateTimeOffset? UpdatedAt { get; set; }
     }
 }

@@ -74,7 +74,7 @@ namespace BarberFlow.Application.Features.Auth.Commands.RefreshUserToken
             if (userProfile == null)
                 throw new UserProfileNotFoundException();
 
-            var now = DateTime.UtcNow;
+            var now = DateTimeOffset.UtcNow;
 
             // Crear nuevo token primero
             var newRefreshTokenValue = _jwtService.GenerateRefreshToken();

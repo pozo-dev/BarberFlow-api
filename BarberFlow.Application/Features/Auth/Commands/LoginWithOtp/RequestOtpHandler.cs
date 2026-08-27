@@ -59,7 +59,7 @@ namespace BarberFlow.Application.Features.Auth.Commands.LoginWithOtp
         {
             var code = OtpGenerator.Generate();
 
-            var expiresAt = DateTime.UtcNow.AddMinutes(AuthenticationSettings.OtpExpirationMinutes);
+            var expiresAt = DateTimeOffset.UtcNow.AddMinutes(AuthenticationSettings.OtpExpirationMinutes);
 
             var otp = new OtpCode(
                 userId,

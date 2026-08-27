@@ -1,3 +1,4 @@
+using BarberFlow.Application.Common.Time;
 using BarberFlow.Domain.Interfaces.Repositories;
 using MediatR;
 
@@ -45,13 +46,15 @@ public sealed class GetAppointmentAvailabilityCalendarHandler : IRequestHandler<
             .ToList();
         if (candidateIds.Count == 0) return result;
 
-        var booked = await _appointments.GetByBranchAndDateRangeAsync(branch.Id, request.From, request.To, cancellationToken);
+        var fromUtc = BranchTimeZone.ToUtc(request.From, branch.TimeZoneId);
+        var toUtc = BranchTimeZone.ToUtc(request.To.AddDays(1), branch.TimeZoneId);
+        var booked = await _appointments.GetByBranchAndRangeAsync(branch.Id, fromUtc, toUtc, cancellationToken);
         var duration = TimeSpan.FromTicks(services.Sum(service => service.Duration.Ticks));
         for (var date = request.From; date <= request.To; date = date.AddDays(1))
         {
             var schedule = branch.Schedules.SingleOrDefault(item => item.DayOfWeek == AppointmentAvailabilityRules.ScheduleDayOfWeek(date));
             if (schedule is null || schedule.IsClosed) continue;
-            if (AppointmentAvailabilityRules.GetAvailableSlots(date, schedule.OpenTime, schedule.CloseTime, duration, candidateIds, booked).Count > 0)
+            if (AppointmentAvailabilityRules.GetAvailableSlots(date, schedule.OpenTime, schedule.CloseTime, duration, candidateIds, booked, branch.TimeZoneId).Count > 0)
                 result.AvailableDates.Add(date);
         }
         return result;

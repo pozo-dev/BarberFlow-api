@@ -16,7 +16,7 @@
 
         public bool IsActive { get; private set; }
 
-        public DateTime CreatedAt { get; private set; }
+        public DateTimeOffset CreatedAt { get; private set; }
 
         public ICollection<Service> Services { get; private set; }
 
@@ -52,7 +52,7 @@
 
             IsActive = true;
 
-            CreatedAt = DateTime.UtcNow;
+            CreatedAt = DateTimeOffset.UtcNow;
 
             Services = new List<Service>();
             Barbers = new List<UserProfile>();

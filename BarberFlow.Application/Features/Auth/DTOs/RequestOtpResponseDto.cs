@@ -3,6 +3,6 @@
     public class RequestOtpResponse
     {
         public bool Success { get; set; }
-        public DateTime Expiration { get; set; }
+        public DateTimeOffset Expiration { get; set; }
     }
 }

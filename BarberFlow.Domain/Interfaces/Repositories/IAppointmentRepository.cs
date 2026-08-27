@@ -6,10 +6,9 @@ namespace BarberFlow.Domain.Interfaces.Repositories
     {
         void Add(Appointment appointment);
         Task<Appointment?> GetByIdAsync(Guid appointmentId, CancellationToken cancellationToken);
-        Task<bool> ExistsOverlappingAppointmentAsync(Guid branchId, Guid collaboratorId, DateTime start, DateTime end, CancellationToken cancellationToken);
+        Task<bool> ExistsOverlappingAppointmentAsync(Guid branchId, Guid collaboratorId, DateTimeOffset start, DateTimeOffset end, CancellationToken cancellationToken);
         Task<List<Appointment>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken);
         Task<List<Appointment>> GetByBarberShopIdAsync(Guid barberShopId, CancellationToken cancellationToken);
-        Task<List<Appointment>> GetByBranchAndDateAsync(Guid branchId, DateOnly date, CancellationToken cancellationToken);
-        Task<List<Appointment>> GetByBranchAndDateRangeAsync(Guid branchId, DateOnly from, DateOnly to, CancellationToken cancellationToken);
+        Task<List<Appointment>> GetByBranchAndRangeAsync(Guid branchId, DateTimeOffset fromUtc, DateTimeOffset toUtc, CancellationToken cancellationToken);
     }
 }

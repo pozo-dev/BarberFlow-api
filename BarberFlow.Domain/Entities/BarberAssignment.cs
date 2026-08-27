@@ -10,8 +10,8 @@
         public bool IsPrimary { get; private set; }
         public bool IsActive { get; private set; }
 
-        public DateTime CreatedAt { get; private set; }
-        public DateTime? UpdatedAt { get; private set; }
+        public DateTimeOffset CreatedAt { get; private set; }
+        public DateTimeOffset? UpdatedAt { get; private set; }
 
         public Branch Branch { get; private set; } = null!;
         public UserProfile BarberProfile { get; private set; } = null!;
@@ -28,7 +28,7 @@
             BarberProfileId = barberProfileId;
             IsPrimary = isPrimary;
             IsActive = true;
-            CreatedAt = DateTime.UtcNow;
+            CreatedAt = DateTimeOffset.UtcNow;
         }
 
         public static BarberAssignment Create(
@@ -51,19 +51,19 @@
         public void SetPrimary(bool isPrimary)
         {
             IsPrimary = isPrimary;
-            UpdatedAt = DateTime.UtcNow;
+            UpdatedAt = DateTimeOffset.UtcNow;
         }
 
         public void Activate()
         {
             IsActive = true;
-            UpdatedAt = DateTime.UtcNow;
+            UpdatedAt = DateTimeOffset.UtcNow;
         }
 
         public void Deactivate()
         {
             IsActive = false;
-            UpdatedAt = DateTime.UtcNow;
+            UpdatedAt = DateTimeOffset.UtcNow;
         }
     }
 }

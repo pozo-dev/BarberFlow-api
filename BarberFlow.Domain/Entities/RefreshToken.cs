@@ -10,10 +10,10 @@
 
         public string Token { get; private set; } = null!;
 
-        public DateTime ExpiresAt { get; private set; }
-        public DateTime CreatedAt { get; private set; }
+        public DateTimeOffset ExpiresAt { get; private set; }
+        public DateTimeOffset CreatedAt { get; private set; }
 
-        public DateTime? RevokedAt { get; private set; }
+        public DateTimeOffset? RevokedAt { get; private set; }
         public string? RevocationReason { get; private set; }
 
         public string DeviceId { get; private set; } = null!;
@@ -27,19 +27,19 @@
         private RefreshToken() { } // EF Core
 
         // 🔒 Constructor privado
-        private RefreshToken(Guid userId, Guid userProfileId, string token, DateTime expiresAt, string deviceId)
+        private RefreshToken(Guid userId, Guid userProfileId, string token, DateTimeOffset expiresAt, string deviceId)
         {
             Id = Guid.NewGuid();
             UserId = userId;
             UserProfileId = userProfileId;
             Token = token;
             ExpiresAt = expiresAt;
-            CreatedAt = DateTime.UtcNow;
+            CreatedAt = DateTimeOffset.UtcNow;
             DeviceId = deviceId;
         }
 
         // 🏭 FACTORY METHOD
-        public static RefreshToken Create(Guid userId, Guid userProfileId, string token, DateTime expiresAt, string deviceId)
+        public static RefreshToken Create(Guid userId, Guid userProfileId, string token, DateTimeOffset expiresAt, string deviceId)
         {
             if (userId == Guid.Empty)
                 throw new ArgumentException("UserId is required.");
@@ -53,7 +53,7 @@
             if (string.IsNullOrWhiteSpace(deviceId))
                 throw new ArgumentException("DeviceId is required.");
 
-            if (expiresAt <= DateTime.UtcNow)
+            if (expiresAt <= DateTimeOffset.UtcNow)
                 throw new ArgumentException("Expiration must be in the future.");
 
             return new RefreshToken(userId, userProfileId, token, expiresAt, deviceId);
@@ -67,7 +67,7 @@
 
         public bool IsExpired()
         {
-            return DateTime.UtcNow >= ExpiresAt;
+            return DateTimeOffset.UtcNow >= ExpiresAt;
         }
 
         // 🔐 Revocar token (con trazabilidad)
@@ -76,7 +76,7 @@
             if (IsRevoked)
                 return;
 
-            RevokedAt = DateTime.UtcNow;
+            RevokedAt = DateTimeOffset.UtcNow;
             RevocationReason = reason;
         }
     }

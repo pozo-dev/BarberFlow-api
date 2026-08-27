@@ -5,7 +5,7 @@
         public Guid Id { get; private set; }
         public string PhoneNumber { get; private set; }
         public bool IsActive { get; private set; }
-        public DateTime CreatedAt { get; private set; }
+        public DateTimeOffset CreatedAt { get; private set; }
         public IReadOnlyCollection<UserProfile> Profiles { get; private set; }
         public ICollection<Appointment> Appointments { get; private set; }
         public ICollection<RefreshToken> RefreshTokens { get; private set; }
@@ -24,7 +24,7 @@
             Id = Guid.NewGuid();
             PhoneNumber = phoneNumber;
             IsActive = true;
-            CreatedAt = DateTime.UtcNow;
+            CreatedAt = DateTimeOffset.UtcNow;
             Profiles = new List<UserProfile>();
             Appointments = new List<Appointment>();
             RefreshTokens = new List<RefreshToken>();
