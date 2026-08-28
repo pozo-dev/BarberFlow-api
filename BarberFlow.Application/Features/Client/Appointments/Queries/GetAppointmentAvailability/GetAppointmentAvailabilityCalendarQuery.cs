@@ -40,11 +40,10 @@ public sealed class GetAppointmentAvailabilityCalendarHandler : IRequestHandler<
 
         var professionals = await _collaborators.GetActiveByBranchIdAsync(branch.Id, cancellationToken);
         result.HasActiveProfessionals = professionals.Count > 0;
-        var candidateIds = professionals
+        var candidates = professionals
             .Where(professional => !request.ProfessionalId.HasValue || professional.Id == request.ProfessionalId.Value)
-            .Select(professional => professional.Id)
             .ToList();
-        if (candidateIds.Count == 0) return result;
+        if (candidates.Count == 0) return result;
 
         var fromUtc = BranchTimeZone.ToUtc(request.From, branch.TimeZoneId);
         var toUtc = BranchTimeZone.ToUtc(request.To.AddDays(1), branch.TimeZoneId);
@@ -54,7 +53,7 @@ public sealed class GetAppointmentAvailabilityCalendarHandler : IRequestHandler<
         {
             var schedule = branch.Schedules.SingleOrDefault(item => item.DayOfWeek == AppointmentAvailabilityRules.ScheduleDayOfWeek(date));
             if (schedule is null || schedule.IsClosed) continue;
-            if (AppointmentAvailabilityRules.GetAvailableSlots(date, schedule.OpenTime, schedule.CloseTime, duration, candidateIds, booked, branch.TimeZoneId).Count > 0)
+            if (AppointmentAvailabilityRules.GetAvailableSlots(date, schedule.OpenTime, schedule.CloseTime, duration, candidates, booked, branch.TimeZoneId).Count > 0)
                 result.AvailableDates.Add(date);
         }
         return result;

@@ -35,7 +35,9 @@ public sealed class GetAppointmentAvailabilityHandler : IRequestHandler<GetAppoi
         if (schedule is null || schedule.IsClosed) return result;
         var duration = TimeSpan.FromTicks(services.Sum(x => x.Duration.Ticks));
         var professionals = await _collaborators.GetActiveByBranchIdAsync(branch.Id, cancellationToken);
-        var candidates = professionals.Where(x => !request.ProfessionalId.HasValue || x.Id == request.ProfessionalId.Value).Select(x => x.Id).ToList();
+        var candidates = professionals
+            .Where(x => !request.ProfessionalId.HasValue || x.Id == request.ProfessionalId.Value)
+            .ToList();
         var dayStartUtc = BranchTimeZone.ToUtc(request.Date, branch.TimeZoneId);
         var nextDayStartUtc = BranchTimeZone.ToUtc(request.Date.AddDays(1), branch.TimeZoneId);
         var booked = await _appointments.GetByBranchAndRangeAsync(branch.Id, dayStartUtc, nextDayStartUtc, cancellationToken);
@@ -54,7 +56,7 @@ internal static class AppointmentAvailabilityRules
         TimeOnly openTime,
         TimeOnly closeTime,
         TimeSpan duration,
-        IReadOnlyCollection<Guid> candidateIds,
+        IReadOnlyCollection<BarberFlow.Domain.Entities.Collaborator> candidates,
         IReadOnlyCollection<BarberFlow.Domain.Entities.Appointment> booked,
         string? timeZoneId = null)
     {
@@ -65,11 +67,19 @@ internal static class AppointmentAvailabilityRules
             if (startAtUtc <= DateTimeOffset.UtcNow) continue;
             var end = slot.Add(duration);
             var endAtUtc = BranchTimeZone.ToUtc(DateOnly.FromDateTime(end), TimeOnly.FromDateTime(end), timeZoneId);
-            if (candidateIds.Any(id => !booked.Any(appointment => appointment.CollaboratorId == id && startAtUtc < appointment.EndDateTime && endAtUtc > appointment.StartDateTime)))
+            var assignedProfessional = candidates.FirstOrDefault(candidate =>
+                !booked.Any(appointment =>
+                    appointment.CollaboratorId == candidate.Id &&
+                    startAtUtc < appointment.EndDateTime &&
+                    endAtUtc > appointment.StartDateTime));
+
+            if (assignedProfessional is not null)
                 slots.Add(new ClientAppointmentAvailabilitySlotDto
                 {
                     StartAtUtc = startAtUtc,
                     DisplayTime = TimeOnly.FromDateTime(slot),
+                    ProfessionalId = assignedProfessional.Id,
+                    ProfessionalName = assignedProfessional.FullName,
                 });
         }
         return slots;
@@ -87,4 +97,6 @@ public sealed class ClientAppointmentAvailabilitySlotDto
 {
     public DateTimeOffset StartAtUtc { get; init; }
     public TimeOnly DisplayTime { get; init; }
+    public Guid ProfessionalId { get; init; }
+    public string ProfessionalName { get; init; } = string.Empty;
 }
