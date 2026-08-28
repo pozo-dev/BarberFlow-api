@@ -21,13 +21,14 @@ namespace BarberFlow.Infrastructure.Persistence.Repositories
                 .Include(a => a.AppointmentServices)
                 .FirstOrDefaultAsync(a => a.Id == appointmentId, cancellationToken);
 
-        public Task<bool> ExistsOverlappingAppointmentAsync(Guid branchId, Guid collaboratorId, DateTimeOffset start, DateTimeOffset end, CancellationToken cancellationToken) =>
+        public Task<bool> ExistsOverlappingAppointmentAsync(Guid branchId, Guid collaboratorId, DateTimeOffset start, DateTimeOffset end, CancellationToken cancellationToken, Guid? excludedAppointmentId = null) =>
             _context.Appointments
                 .AsNoTracking()
                 .AnyAsync(a =>
                     a.BranchId == branchId &&
                     a.CollaboratorId == collaboratorId &&
-                    a.Status != AppointmentStatus.Cancelled &&
+                    a.Status == AppointmentStatus.Scheduled &&
+                    (!excludedAppointmentId.HasValue || a.Id != excludedAppointmentId.Value) &&
                     start < a.EndDateTime && end > a.StartDateTime,
                     cancellationToken);
 
@@ -51,7 +52,7 @@ namespace BarberFlow.Infrastructure.Persistence.Repositories
         {
             return _context.Appointments
                 .AsNoTracking()
-                .Where(a => a.BranchId == branchId && a.StartDateTime >= fromUtc && a.StartDateTime < toUtc && a.Status != AppointmentStatus.Cancelled)
+                .Where(a => a.BranchId == branchId && a.StartDateTime >= fromUtc && a.StartDateTime < toUtc && a.Status == AppointmentStatus.Scheduled)
                 .ToListAsync(cancellationToken);
         }
     }

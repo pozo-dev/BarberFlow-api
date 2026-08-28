@@ -1,7 +1,9 @@
 using BarberFlow.Application.Features.Appointments.Commands;
 using BarberFlow.Application.Features.Appointments.DTOs;
-using BarberFlow.Application.Features.Appointments.Queries;
+using BarberFlow.Application.Features.Client.Appointments.Commands.CancelClientAppointment;
+using BarberFlow.Application.Features.Client.Appointments.Commands.RescheduleClientAppointment;
 using BarberFlow.Application.Features.Client.Appointments.Queries.GetAppointmentAvailability;
+using BarberFlow.Application.Features.Client.Appointments.Queries.GetMyAppointments;
 using BarberFlow.Application.Features.Client.Appointments.Queries.GetAvailableProfessionals;
 using BarberFlow.Application.Features.Client.Appointments.Queries.GetBranchBookingData;
 using MediatR;
@@ -49,18 +51,28 @@ public sealed class ClientAppointmentsController : ControllerBase
     }
 
     [HttpGet("appointments")]
-    public async Task<ActionResult<List<AppointmentDto>>> GetMine(CancellationToken cancellationToken) =>
-        Ok(await _mediator.Send(new GetUserAppointmentsQuery(), cancellationToken));
+    public async Task<ActionResult<IReadOnlyList<ClientAppointmentDto>>> GetMine(CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new GetMyAppointmentsQuery(), cancellationToken));
 
     [HttpGet("appointments/{id:guid}")]
-    public async Task<ActionResult<AppointmentDto>> GetById(Guid id, CancellationToken cancellationToken)
+    public async Task<ActionResult<ClientAppointmentDto>> GetById(Guid id, CancellationToken cancellationToken)
     {
-        var appointments = await _mediator.Send(new GetUserAppointmentsQuery(), cancellationToken);
+        var appointments = await _mediator.Send(new GetMyAppointmentsQuery(), cancellationToken);
         var appointment = appointments.SingleOrDefault(item => item.Id == id);
         return appointment is null ? NotFound() : Ok(appointment);
     }
 
     [HttpPost("appointments/{id:guid}/cancel")]
-    public async Task<IActionResult> Cancel(Guid id, CancellationToken cancellationToken) =>
-        Ok(await _mediator.Send(new CancelAppointmentCommand { AppointmentId = id }, cancellationToken));
+    public async Task<IActionResult> Cancel(Guid id, CancellationToken cancellationToken)
+    {
+        await _mediator.Send(new CancelClientAppointmentCommand(id), cancellationToken);
+        return NoContent();
+    }
+
+    [HttpPut("appointments/{id:guid}/reschedule")]
+    public async Task<ActionResult<Guid>> Reschedule(Guid id, [FromBody] RescheduleClientAppointmentCommand command, CancellationToken cancellationToken)
+    {
+        var replacementId = await _mediator.Send(command with { AppointmentId = id }, cancellationToken);
+        return Ok(replacementId);
+    }
 }

@@ -11,6 +11,7 @@ namespace BarberFlow.Domain.Entities
         public DateTimeOffset StartDateTime { get; private set; }
         public DateTimeOffset EndDateTime { get; private set; }
         public AppointmentStatus Status { get; private set; }
+        public Guid? RescheduledToAppointmentId { get; private set; }
         public DateTimeOffset CreatedAt { get; private set; }
         public User User { get; private set; }
         public Branch Branch { get; private set; } = null!;
@@ -38,6 +39,14 @@ namespace BarberFlow.Domain.Entities
         public void Completed() => Status = AppointmentStatus.Completed;
         public void Cancel() => Status = AppointmentStatus.Cancelled;
         public void NoShow() => Status = AppointmentStatus.NoShow;
+        public void RescheduleTo(Guid replacementAppointmentId)
+        {
+            if (!CanBeCancelled())
+                throw new InvalidOperationException("Esta cita ya no puede reprogramarse.");
+
+            Status = AppointmentStatus.Rescheduled;
+            RescheduledToAppointmentId = replacementAppointmentId;
+        }
 
         public bool CanBeCancelled()
         {
