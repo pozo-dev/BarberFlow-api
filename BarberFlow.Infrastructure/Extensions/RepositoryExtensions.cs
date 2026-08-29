@@ -3,7 +3,9 @@ using BarberFlow.Domain.Interfaces.Repositories;
 using BarberFlow.Application.Features.Client.Appointments;
 using BarberFlow.Infrastructure.Persistence.Repositories.Client;
 using BarberFlow.Application.Features.Owner.Appointments;
+using BarberFlow.Application.Features.Barber.Appointments;
 using BarberFlow.Infrastructure.Persistence.Repositories.Owner;
+using BarberFlow.Infrastructure.Persistence.Repositories.Barber;
 using BarberFlow.Infrastructure.Persistence;
 using BarberFlow.Infrastructure.Persistence.Repositories;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,6 +29,7 @@ namespace BarberFlow.Infrastructure.Extensions
             services.AddScoped<IAppointmentRepository, AppointmentRepository>();
             services.AddScoped<IClientAppointmentRepository, ClientAppointmentRepository>();
             services.AddScoped<IOwnerAppointmentRepository, OwnerAppointmentRepository>();
+            services.AddScoped<IBarberAppointmentRepository, BarberAppointmentRepository>();
             services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IBranchRepository, BranchRepository>();
             services.AddScoped<IBarberAssignmentRepository, BarberAssignmentRepository>();

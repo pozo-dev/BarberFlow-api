@@ -1,5 +1,6 @@
 using BarberFlow.Application.Common.Exceptions;
 using BarberFlow.Application.Common.Interfaces;
+using BarberFlow.Application.Common.Validation;
 using BarberFlow.Application.Features.Branches.Exceptions;
 using BarberFlow.Application.Features.Collaborators.Exceptions;
 using BarberFlow.Domain.Entities;
@@ -34,7 +35,7 @@ namespace BarberFlow.Application.Features.Collaborators.Commands.UpdateCollabora
                 throw new ForbiddenAccessException();
             try
             {
-                collaborator.Update(request.BranchId, request.FullName, request.PhoneNumber);
+                collaborator.Update(request.BranchId, request.FullName, PhoneNumberValidator.NormalizeAndValidate(request.PhoneNumber));
             }
             catch (ArgumentException e) 
             { 

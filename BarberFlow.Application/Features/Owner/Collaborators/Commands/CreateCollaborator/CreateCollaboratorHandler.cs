@@ -1,7 +1,7 @@
 using BarberFlow.Application.Common.Exceptions;
 using BarberFlow.Application.Common.Interfaces;
+using BarberFlow.Application.Common.Validation;
 using BarberFlow.Application.Features.Branches.Exceptions;
-using BarberFlow.Domain.Constants;
 using BarberFlow.Domain.Entities;
 using BarberFlow.Domain.Interfaces;
 using BarberFlow.Domain.Interfaces.Repositories;
@@ -31,7 +31,7 @@ namespace BarberFlow.Application.Features.Collaborators.Commands.CreateCollabora
             var branch = await _branches.GetByIdAsync(request.BranchId, cancellationToken) ?? throw new BranchNotFoundException();
             if (branch.BarberShopId != profile.BarberShopId) throw new ForbiddenAccessException();
             Collaborator collaborator;
-            try { collaborator = Collaborator.Create(request.BranchId, request.FullName, request.PhoneNumber, RoleIds.Barber); }
+            try { collaborator = Collaborator.Create(request.BranchId, request.FullName, PhoneNumberValidator.NormalizeAndValidate(request.PhoneNumber)); }
             catch (ArgumentException exception) { throw new ValidationException(exception.Message); }
             await _collaborators.AddAsync(collaborator, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);

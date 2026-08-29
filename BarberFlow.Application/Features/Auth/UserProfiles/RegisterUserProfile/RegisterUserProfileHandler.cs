@@ -15,17 +15,20 @@ namespace BarberFlow.Application.Features.UserProfiles.RegisterUserProfile
         private readonly IUserRepository _userRepository;
         private readonly IUserProfileRepository _userProfileRepository;
         private readonly IRoleRepository _roleRepository;
+        private readonly ICollaboratorRepository _collaboratorRepository;
         private readonly IUnitOfWork _unitOfWork;
 
         public RegisterUserProfileHandler(
             IUserRepository userRepository,
             IUserProfileRepository userProfileRepository,
             IRoleRepository roleRepository,
+            ICollaboratorRepository collaboratorRepository,
             IUnitOfWork unitOfWork)
         {
             _userRepository = userRepository;
             _userProfileRepository = userProfileRepository;
             _roleRepository = roleRepository;
+            _collaboratorRepository = collaboratorRepository;
             _unitOfWork = unitOfWork;
         }
 
@@ -43,6 +46,16 @@ namespace BarberFlow.Application.Features.UserProfiles.RegisterUserProfile
                 request.BarberShopId);
 
             _userProfileRepository.Add(profile);
+
+            if (request.RoleId == RoleIds.Barber)
+            {
+                var collaborators = await _collaboratorRepository.GetActiveByPhoneNumberAsync(user.PhoneNumber, cancellationToken);
+                if (collaborators.Count == 0)
+                    throw new ValidationException("Solo un colaborador activo puede crear un perfil de Barbero.");
+
+                foreach (var collaborator in collaborators)
+                    collaborator.LinkUserProfile(profile.Id);
+            }
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 

@@ -19,12 +19,13 @@ namespace BarberFlow.Infrastructure.Persistence.Configurations
                 .HasForeignKey(x => x.BranchId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasOne(x => x.Role)
-                .WithMany()
-                .HasForeignKey(x => x.RoleId)
+            builder.HasOne(x => x.UserProfile)
+                .WithMany(x => x.Collaborators)
+                .HasForeignKey(x => x.UserProfileId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasIndex(x => new { x.BranchId, x.IsActive });
+            builder.HasIndex(x => x.UserProfileId);
         }
     }
 }

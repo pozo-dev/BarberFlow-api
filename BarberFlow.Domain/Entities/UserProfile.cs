@@ -17,11 +17,13 @@ namespace BarberFlow.Domain.Entities
         public BarberShop? BarberShop { get; private set; }
         public ICollection<RefreshToken> RefreshTokens { get; private set; }
         public ICollection<BarberAssignment> BarberAssignments { get; private set; }
+        public ICollection<Collaborator> Collaborators { get; private set; }
 
         private UserProfile()
         {
             RefreshTokens = new List<RefreshToken>();
             BarberAssignments = new List<BarberAssignment>();
+            Collaborators = new List<Collaborator>();
         }
 
         public UserProfile(Guid userId, int roleId, Guid? barberShopId = null)
@@ -34,6 +36,7 @@ namespace BarberFlow.Domain.Entities
             CreatedAt = DateTimeOffset.UtcNow;
             RefreshTokens = new List<RefreshToken>();
             BarberAssignments = new List<BarberAssignment>();
+            Collaborators = new List<Collaborator>();
         }
 
         public void AssignBarberShop(Guid barberShopId)

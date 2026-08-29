@@ -16,7 +16,7 @@ namespace BarberFlow.Application.Features.Collaborators.Queries.GetCollaboratorB
             if (profile?.BarberShopId is null) throw new ForbiddenAccessException();
             var x = await _collaborators.GetByIdAsync(request.Id, ct) ?? throw new CollaboratorNotFoundException();
             if (x.Branch.BarberShopId != profile.BarberShopId) throw new ForbiddenAccessException();
-            return new CollaboratorDto { Id = x.Id, BranchId = x.BranchId, FullName = x.FullName, PhoneNumber = x.PhoneNumber, RoleId = x.RoleId, IsActive = x.IsActive, CreatedAt = x.CreatedAt, UpdatedAt = x.UpdatedAt };
+            return new CollaboratorDto { Id = x.Id, BranchId = x.BranchId, FullName = x.FullName, PhoneNumber = x.PhoneNumber, IsActive = x.IsActive, CreatedAt = x.CreatedAt, UpdatedAt = x.UpdatedAt };
         }
     }
 }
