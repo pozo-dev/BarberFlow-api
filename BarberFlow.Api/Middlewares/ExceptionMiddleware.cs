@@ -6,6 +6,7 @@ using BarberFlow.Application.Features.Users.Exceptions;
 using BarberFlow.Application.Features.Collaborators.Exceptions;
 using BarberFlow.Application.Features.Client.Appointments.Commands.CancelClientAppointment;
 using BarberFlow.Application.Features.Client.Appointments.Commands.RescheduleClientAppointment;
+using BarberFlow.Application.Features.Owner.Appointments.Commands.UpdateOwnerAppointmentStatus;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Text.Json;
@@ -61,9 +62,13 @@ namespace BarberFlow.Api.Middlewares
 
                 ClientAppointmentRescheduleConflictException => StatusCodes.Status409Conflict,
 
+                OwnerAppointmentCannotBeUpdatedException => StatusCodes.Status409Conflict,
+
                 ClientAppointmentNotFoundException => StatusCodes.Status404NotFound,
 
                 ClientAppointmentNotFoundForRescheduleException => StatusCodes.Status404NotFound,
+
+                OwnerAppointmentNotFoundException => StatusCodes.Status404NotFound,
 
                 UserNotActiveException => StatusCodes.Status401Unauthorized,
 
