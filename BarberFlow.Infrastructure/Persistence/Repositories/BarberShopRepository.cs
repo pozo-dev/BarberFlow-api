@@ -30,6 +30,8 @@ namespace BarberFlow.Infrastructure.Persistence.Repositories
             return await _context.BarberShops
                 .Include(x => x.Branches)
                     .ThenInclude(x => x.LocationSearch)
+                .Include(x => x.Branches)
+                    .ThenInclude(x => x.Schedules)
                 .FirstOrDefaultAsync(
                     x => x.OwnerUserId == ownerUserId,
                     cancellationToken);
@@ -43,7 +45,11 @@ namespace BarberFlow.Infrastructure.Persistence.Repositories
             CancellationToken cancellationToken)
         {
             return await BuildActiveSearchQuery(search, city)
-                .Include(shop => shop.Branches.Where(branch => branch.IsActive))
+                .Include(shop => shop.Branches.Where(branch =>
+                    branch.IsActive &&
+                    branch.Schedules.Any(schedule => !schedule.IsClosed) &&
+                    _context.Collaborators.Any(collaborator =>
+                        collaborator.BranchId == branch.Id && collaborator.IsActive)))
                     .ThenInclude(branch => branch.LocationSearch)
                 .OrderBy(shop => shop.Name)
                 .Skip(skip)
@@ -64,7 +70,12 @@ namespace BarberFlow.Infrastructure.Persistence.Repositories
         {
             return await _context.Branches
                 .AsNoTracking()
-                .Where(branch => branch.IsActive && branch.BarberShop.IsActive)
+                .Where(branch =>
+                    branch.IsActive &&
+                    branch.BarberShop.IsActive &&
+                    branch.BarberShop.Services.Any(service => service.IsActive) &&
+                    _context.Collaborators.Any(collaborator =>
+                        collaborator.BranchId == branch.Id && collaborator.IsActive))
                 .Select(branch => branch.LocationSearch.DisplayName)
                 .Distinct()
                 .OrderBy(city => city)
@@ -75,7 +86,14 @@ namespace BarberFlow.Infrastructure.Persistence.Repositories
         {
             var query = _context.BarberShops
                 .AsNoTracking()
-                .Where(shop => shop.IsActive && shop.Branches.Any(branch => branch.IsActive));
+                .Where(shop =>
+                    shop.IsActive &&
+                    shop.Services.Any(service => service.IsActive) &&
+                    shop.Branches.Any(branch =>
+                        branch.IsActive &&
+                        branch.Schedules.Any(schedule => !schedule.IsClosed) &&
+                        _context.Collaborators.Any(collaborator =>
+                            collaborator.BranchId == branch.Id && collaborator.IsActive)));
 
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -102,10 +120,25 @@ namespace BarberFlow.Infrastructure.Persistence.Repositories
         {
             return _context.BarberShops
                 .AsNoTracking()
-                .Where(shop => shop.Id == id && shop.IsActive)
-                .Include(shop => shop.Branches.Where(branch => branch.IsActive))
+                .Where(shop =>
+                    shop.Id == id &&
+                    shop.IsActive &&
+                    shop.Services.Any(service => service.IsActive) &&
+                    shop.Branches.Any(branch =>
+                        branch.IsActive &&
+                        _context.Collaborators.Any(collaborator =>
+                            collaborator.BranchId == branch.Id && collaborator.IsActive)))
+                .Include(shop => shop.Branches.Where(branch =>
+                    branch.IsActive &&
+                    branch.Schedules.Any(schedule => !schedule.IsClosed) &&
+                    _context.Collaborators.Any(collaborator =>
+                        collaborator.BranchId == branch.Id && collaborator.IsActive)))
                     .ThenInclude(branch => branch.Schedules)
-                .Include(shop => shop.Branches.Where(branch => branch.IsActive))
+                .Include(shop => shop.Branches.Where(branch =>
+                    branch.IsActive &&
+                    branch.Schedules.Any(schedule => !schedule.IsClosed) &&
+                    _context.Collaborators.Any(collaborator =>
+                        collaborator.BranchId == branch.Id && collaborator.IsActive)))
                     .ThenInclude(branch => branch.LocationSearch)
                 .FirstOrDefaultAsync(cancellationToken);
         }

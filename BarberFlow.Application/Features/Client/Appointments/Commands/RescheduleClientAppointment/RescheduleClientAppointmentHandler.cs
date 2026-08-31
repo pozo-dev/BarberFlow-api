@@ -46,7 +46,7 @@ public sealed class RescheduleClientAppointmentHandler : IRequestHandler<Resched
         var duration = TimeSpan.FromTicks(services.Sum(service => service.Duration.Ticks));
         var end = request.StartDateTime.Add(duration);
         var localEnd = BranchTimeZone.ToBranchTime(end, branch.TimeZoneId);
-        var scheduleDay = (DayOfWeek)(((int)localStart.DayOfWeek + 6) % 7);
+        var scheduleDay = BarberFlow.Domain.Enums.ScheduleDayExtensions.ToScheduleDay(localStart.DayOfWeek);
         var schedule = branch.Schedules.SingleOrDefault(item => item.DayOfWeek == scheduleDay);
         if (schedule is null || schedule.IsClosed || localStart.TimeOfDay < schedule.OpenTime.ToTimeSpan() || localEnd.Date != localStart.Date || localEnd.TimeOfDay > schedule.CloseTime.ToTimeSpan()) throw new ClientAppointmentRescheduleConflictException();
 

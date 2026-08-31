@@ -66,6 +66,7 @@
             byte[] logo,
             byte[] banner)
         {
+            ValidateDetails(name, description);
             return new BarberShop(ownerUserId, name, description, logo, banner);
         }
 
@@ -75,6 +76,7 @@
             byte[] logo,
             byte[] banner)
         {
+            ValidateDetails(name, description);
             Name = name.Trim();
 
             Description = description.Trim();
@@ -82,6 +84,21 @@
             Logo = logo;
 
             Banner = banner;
+        }
+
+        private static void ValidateDetails(string name, string description)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("El nombre de la barbería es requerido.");
+
+            if (name.Trim().Length > 150)
+                throw new ArgumentException("El nombre de la barbería no puede superar 150 caracteres.");
+
+            if (string.IsNullOrWhiteSpace(description))
+                throw new ArgumentException("La descripción de la barbería es requerida.");
+
+            if (description.Trim().Length > 500)
+                throw new ArgumentException("La descripción de la barbería no puede superar 500 caracteres.");
         }
 
         public void Activate()

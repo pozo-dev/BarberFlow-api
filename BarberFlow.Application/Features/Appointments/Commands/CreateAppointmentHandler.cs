@@ -57,7 +57,7 @@ namespace BarberFlow.Application.Features.Appointments.Commands
             var duration = TimeSpan.FromTicks(services.Sum(x => x.Duration.Ticks));
             var end = input.StartDateTime.Add(duration);
             var localEnd = BranchTimeZone.ToBranchTime(end, branch.TimeZoneId);
-            var scheduleDayOfWeek = (DayOfWeek)(((int)localStart.DayOfWeek + 6) % 7);
+            var scheduleDayOfWeek = BarberFlow.Domain.Enums.ScheduleDayExtensions.ToScheduleDay(localStart.DayOfWeek);
             var schedule = branch.Schedules.SingleOrDefault(x => x.DayOfWeek == scheduleDayOfWeek);
             if (schedule is null || schedule.IsClosed || localStart.TimeOfDay < schedule.OpenTime.ToTimeSpan() || localEnd.Date != localStart.Date || localEnd.TimeOfDay > schedule.CloseTime.ToTimeSpan())
                 throw new InvalidOperationException("La hora seleccionada no est� disponible.");

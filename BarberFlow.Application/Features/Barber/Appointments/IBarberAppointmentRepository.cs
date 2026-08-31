@@ -7,7 +7,7 @@ public interface IBarberAppointmentRepository
     Task<IReadOnlyList<BarberAppointmentRecord>> GetByBarberProfileIdAsync(Guid barberProfileId, CancellationToken cancellationToken);
     Task<Appointment?> GetOwnedByIdAsync(Guid appointmentId, Guid barberProfileId, CancellationToken cancellationToken);
 }
-
+  
 public sealed class BarberAppointmentRecord
 {
     public Guid Id { get; init; }

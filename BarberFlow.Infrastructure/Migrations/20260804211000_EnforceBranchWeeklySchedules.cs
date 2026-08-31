@@ -61,8 +61,8 @@ namespace BarberFlow.Infrastructure.Migrations
 
                 ;WITH Days AS
                 (
-                    SELECT CAST(0 AS int) AS DayOfWeek UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL
-                    SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6
+                    SELECT CAST(1 AS int) AS DayOfWeek UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL
+                    SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7
                 )
                 INSERT INTO BranchSchedules (Id, BranchId, DayOfWeek, OpenTime, CloseTime, IsClosed)
                 SELECT NEWID(), branch.Id, dayOfWeek.DayOfWeek,

@@ -44,7 +44,6 @@ namespace BarberFlow.Application.Features.Branches.Queries.GetMyBranches
             var branches = await _branchRepository.GetByBarberShopIdAsync(
                 profile.BarberShopId.Value,
                 cancellationToken);
-
             return branches
                 .Select(x => new BranchDto
                 {
@@ -56,10 +55,24 @@ namespace BarberFlow.Application.Features.Branches.Queries.GetMyBranches
                     PhoneNumber = x.PhoneNumber,
                     IsActive = x.IsActive,
                     IsMain = x.IsMain,
+                    MissingBookingRequirements = GetMissingBookingRequirements(x),
                     CreatedAt = x.CreatedAt
                 })
                 .OrderBy(x => x.CreatedAt)
                 .ToList();
+        }
+
+        private static IReadOnlyList<string> GetMissingBookingRequirements(
+            BarberFlow.Domain.Entities.Branch branch)
+        {
+            var requirements = new List<string>();
+            if (!branch.IsActive) requirements.Add("activation");
+            if (branch.Schedules.Count != BarberFlow.Domain.Entities.Branch.WeeklyScheduleDays ||
+                !branch.Schedules.Any(schedule => !schedule.IsClosed))
+            {
+                requirements.Add("schedules");
+            }
+            return requirements;
         }
     }
 }

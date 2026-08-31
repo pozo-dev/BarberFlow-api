@@ -6,7 +6,7 @@
 
         public Guid BranchId { get; private set; }
 
-        public DayOfWeek DayOfWeek { get; private set; }
+        public BarberFlow.Domain.Enums.ScheduleDay DayOfWeek { get; private set; }
 
         public TimeOnly OpenTime { get; private set; }
 
@@ -22,7 +22,7 @@
 
         private BranchSchedule(
             Guid branchId,
-            DayOfWeek dayOfWeek,
+            BarberFlow.Domain.Enums.ScheduleDay dayOfWeek,
             TimeOnly openTime,
             TimeOnly closeTime,
             bool isClosed)
@@ -42,7 +42,7 @@
 
         public static BranchSchedule Create(
             Guid branchId,
-            DayOfWeek dayOfWeek,
+            BarberFlow.Domain.Enums.ScheduleDay dayOfWeek,
             TimeOnly openTime,
             TimeOnly closeTime,
             bool isClosed = false)

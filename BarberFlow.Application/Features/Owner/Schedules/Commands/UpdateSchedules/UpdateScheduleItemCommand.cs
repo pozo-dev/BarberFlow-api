@@ -4,7 +4,7 @@ namespace BarberFlow.Application.Features.Schedules.Commands.UpdateSchedules
     {
         public Guid ScheduleId { get; set; }
 
-        public DayOfWeek DayOfWeek { get; set; }
+        public BarberFlow.Domain.Enums.ScheduleDay DayOfWeek { get; set; }
 
         public TimeSpan OpenTime { get; set; }
 

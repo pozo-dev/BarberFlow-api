@@ -2,7 +2,7 @@ namespace BarberFlow.Domain.Entities
 {
     public sealed record BranchScheduleUpdate(
         Guid ScheduleId,
-        DayOfWeek DayOfWeek,
+        BarberFlow.Domain.Enums.ScheduleDay DayOfWeek,
         TimeOnly OpenTime,
         TimeOnly CloseTime,
         bool IsClosed);

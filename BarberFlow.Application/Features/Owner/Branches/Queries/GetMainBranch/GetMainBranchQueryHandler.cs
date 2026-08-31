@@ -46,7 +46,7 @@ namespace BarberFlow.Application.Features.Branches.Queries.GetMainBranch
             var monday =
                 branch.Schedules
                     .FirstOrDefault(x =>
-                        x.DayOfWeek == DayOfWeek.Monday);
+                        x.DayOfWeek == BarberFlow.Domain.Enums.ScheduleDay.Monday);
 
             return new GetMainBranchResponseDto
             {

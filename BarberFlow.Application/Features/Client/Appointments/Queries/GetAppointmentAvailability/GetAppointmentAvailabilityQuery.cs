@@ -48,8 +48,7 @@ public sealed class GetAppointmentAvailabilityHandler : IRequestHandler<GetAppoi
 
 internal static class AppointmentAvailabilityRules
 {
-    internal static DayOfWeek ScheduleDayOfWeek(DateOnly date) =>
-        (DayOfWeek)(((int)date.DayOfWeek + 6) % 7);
+    internal static BarberFlow.Domain.Enums.ScheduleDay ScheduleDayOfWeek(DateOnly date) => BarberFlow.Domain.Enums.ScheduleDayExtensions.ToScheduleDay(date.DayOfWeek);
 
     internal static List<ClientAppointmentAvailabilitySlotDto> GetAvailableSlots(
         DateOnly date,

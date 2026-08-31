@@ -17,10 +17,17 @@ namespace BarberFlow.Api.Middlewares
     public sealed class ExceptionMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly ILogger<ExceptionMiddleware> _logger;
+        private readonly IHostEnvironment _environment;
 
-        public ExceptionMiddleware(RequestDelegate next)
+        public ExceptionMiddleware(
+            RequestDelegate next,
+            ILogger<ExceptionMiddleware> logger,
+            IHostEnvironment environment)
         {
             _next = next;
+            _logger = logger;
+            _environment = environment;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -35,13 +42,15 @@ namespace BarberFlow.Api.Middlewares
             }
         }
 
-        private static async Task HandleExceptionAsync(
+        private async Task HandleExceptionAsync(
             HttpContext context,
             Exception exception)
         {
             var statusCode = exception switch
             {
                 ValidationException => StatusCodes.Status400BadRequest,
+
+                ArgumentException => StatusCodes.Status400BadRequest,
 
                 ForbiddenAccessException => StatusCodes.Status403Forbidden,
 
@@ -97,11 +106,23 @@ namespace BarberFlow.Api.Middlewares
             context.Response.StatusCode = statusCode;
             context.Response.ContentType = "application/json";
 
+            _logger.LogError(
+                exception,
+                "Unhandled exception while processing {Method} {Path}",
+                context.Request.Method,
+                context.Request.Path);
+
+            var detail = statusCode == StatusCodes.Status500InternalServerError
+                ? _environment.IsDevelopment()
+                    ? exception.GetBaseException().Message
+                    : "Ocurrió un error inesperado al procesar la solicitud."
+                : exception.Message;
+
             var problem = new ProblemDetails
             {
                 Status = statusCode,
                 Title = ReasonPhrases.GetReasonPhrase(statusCode),
-                Detail = exception.Message
+                Detail = detail
             };
 
             await context.Response.WriteAsync(

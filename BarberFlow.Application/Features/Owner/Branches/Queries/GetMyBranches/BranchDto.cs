@@ -17,6 +17,8 @@
 
         public bool IsMain { get; set; }
 
+        public IReadOnlyList<string> MissingBookingRequirements { get; set; } = [];
+
         public DateTimeOffset CreatedAt { get; set; }
     }
 }

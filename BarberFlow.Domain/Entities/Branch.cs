@@ -90,14 +90,23 @@
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("El nombre es requerido.");
 
+            if (name.Trim().Length > 120)
+                throw new ArgumentException("El nombre no puede superar 120 caracteres.");
+
             if (string.IsNullOrWhiteSpace(address))
                 throw new ArgumentException("La dirección es requerida.");
+
+            if (address.Trim().Length > 300)
+                throw new ArgumentException("La dirección no puede superar 300 caracteres.");
 
             if (locationSearchId <= 0)
                 throw new ArgumentException("La ubicación es requerida.");
 
             if (string.IsNullOrWhiteSpace(phoneNumber))
                 throw new ArgumentException("El teléfono es requerido.");
+
+            if (phoneNumber.Trim().Length > 20)
+                throw new ArgumentException("El teléfono no puede superar 20 caracteres.");
 
             return new Branch(
                 barberShopId,
@@ -164,7 +173,7 @@
 
         private void InitializeDefaultSchedules()
         {
-            foreach (var day in Enum.GetValues<DayOfWeek>())
+            foreach (var day in Enum.GetValues<BarberFlow.Domain.Enums.ScheduleDay>())
             {
                 Schedules.Add(BranchSchedule.Create(
                     Id,

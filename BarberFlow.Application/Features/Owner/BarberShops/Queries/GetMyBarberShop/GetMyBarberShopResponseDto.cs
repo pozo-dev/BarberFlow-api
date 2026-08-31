@@ -19,6 +19,8 @@
         public int? LocationSearchId { get; set; }
         public string LocationDisplayName { get; set; } = string.Empty;
 
+        public IReadOnlyList<string> MissingSetupItems { get; set; } = [];
+
         //public TimeOnly OpenTime { get; set; }
 
         //public TimeOnly CloseTime { get; set; }

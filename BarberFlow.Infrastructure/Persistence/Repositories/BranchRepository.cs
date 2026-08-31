@@ -19,6 +19,7 @@ namespace BarberFlow.Infrastructure.Persistence.Repositories
         {
             return await _context.Branches
                 .Include(x => x.LocationSearch)
+                .Include(x => x.Schedules)
                 .Where(x => x.BarberShopId == barberShopId)
                 .OrderBy(x => x.Name)
                 .ToListAsync(cancellationToken);
