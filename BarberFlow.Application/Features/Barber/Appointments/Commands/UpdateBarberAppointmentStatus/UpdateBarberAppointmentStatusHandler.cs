@@ -26,9 +26,13 @@ public sealed class UpdateBarberAppointmentStatusHandler : IRequestHandler<Updat
 
         var appointment = await _appointments.GetOwnedByIdAsync(request.AppointmentId, profile.Id, cancellationToken)
             ?? throw new BarberAppointmentNotFoundException();
-        if (appointment.Status != AppointmentStatus.Scheduled || appointment.StartDateTime > DateTimeOffset.UtcNow)
+        if (appointment.Status != AppointmentStatus.Scheduled)
             throw new BarberAppointmentCannotBeUpdatedException();
-        if (request.Action == BarberAppointmentAction.NoShow && appointment.StartDateTime.AddMinutes(15) > DateTimeOffset.UtcNow)
+
+        var now = DateTimeOffset.UtcNow;
+        if (request.Action == BarberAppointmentAction.Complete && appointment.EndDateTime > now)
+            throw new BarberAppointmentCannotBeUpdatedException();
+        if (request.Action == BarberAppointmentAction.NoShow && appointment.StartDateTime.AddMinutes(15) > now)
             throw new BarberAppointmentCannotBeUpdatedException();
 
         if (request.Action == BarberAppointmentAction.Complete) appointment.Completed();

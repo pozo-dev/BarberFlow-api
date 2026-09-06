@@ -16,8 +16,11 @@ public sealed class BarberAppointmentsController : ControllerBase
     public BarberAppointmentsController(IMediator mediator) => _mediator = mediator;
 
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<BarberAppointmentDto>>> Get([FromQuery] DateOnly date, CancellationToken cancellationToken) =>
-        Ok(await _mediator.Send(new GetBarberAppointmentsQuery(date), cancellationToken));
+    public async Task<ActionResult<IReadOnlyList<BarberAppointmentDto>>> Get(
+        [FromQuery] DateOnly from,
+        [FromQuery] DateOnly to,
+        CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new GetBarberAppointmentsQuery(from, to), cancellationToken));
 
     [HttpPatch("{id:guid}/complete")]
     public async Task<IActionResult> Complete(Guid id, CancellationToken cancellationToken)
