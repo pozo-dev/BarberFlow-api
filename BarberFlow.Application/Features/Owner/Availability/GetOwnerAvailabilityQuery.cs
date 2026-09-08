@@ -34,6 +34,7 @@ public sealed record OwnerWorkPeriodDto(
 
 public sealed record AffectedAppointmentDto(
     Guid Id,
+    Guid CollaboratorId,
     string BranchName,
     string CollaboratorName,
     string ClientPhoneNumber,
@@ -148,6 +149,7 @@ public sealed class GetOwnerAvailabilityHandler(
                 .ToList(),
             affectedAppointments.Select(appointment => new AffectedAppointmentDto(
                 appointment.Id,
+                appointment.CollaboratorId,
                 appointment.Branch.Name,
                 appointment.Collaborator.FullName,
                 appointment.User.PhoneNumber,
