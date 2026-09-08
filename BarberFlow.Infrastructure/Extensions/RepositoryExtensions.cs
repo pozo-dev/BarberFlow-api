@@ -34,6 +34,10 @@ public static class RepositoryExtensions
         services.AddScoped<IBranchRepository, BranchRepository>();
         services.AddScoped<IBarberAssignmentRepository, BarberAssignmentRepository>();
         services.AddScoped<ICollaboratorRepository, CollaboratorRepository>();
+        services.AddScoped<ICollaboratorAvailabilityRepository, CollaboratorAvailabilityRepository>();
+        services.AddScoped<IAvailabilityRequestRepository, AvailabilityRequestRepository>();
+        services.AddScoped<BarberFlow.Application.Features.Barber.Availability.BarberAvailabilityAccess>();
+        services.AddScoped<BarberFlow.Application.Features.Owner.Availability.OwnerAvailabilityAccess>();
         services.AddScoped<ILocationSearchRepository, LocationSearchRepository>();
 
         return services;

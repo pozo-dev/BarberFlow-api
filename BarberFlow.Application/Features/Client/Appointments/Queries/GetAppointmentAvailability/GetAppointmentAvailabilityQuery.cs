@@ -1,4 +1,5 @@
 using BarberFlow.Application.Common.Time;
+using BarberFlow.Application.Features.Appointments.Availability;
 using BarberFlow.Domain.Interfaces.Repositories;
 using MediatR;
 
@@ -11,14 +12,14 @@ public sealed class GetAppointmentAvailabilityHandler : IRequestHandler<GetAppoi
     private readonly IBranchRepository _branches;
     private readonly IServiceRepository _services;
     private readonly ICollaboratorRepository _collaborators;
-    private readonly IAppointmentRepository _appointments;
+    private readonly ICollaboratorAvailabilityRepository _availability;
 
-    public GetAppointmentAvailabilityHandler(IBranchRepository branches, IServiceRepository services, ICollaboratorRepository collaborators, IAppointmentRepository appointments)
+    public GetAppointmentAvailabilityHandler(IBranchRepository branches, IServiceRepository services, ICollaboratorRepository collaborators, ICollaboratorAvailabilityRepository availability)
     {
         _branches = branches;
         _services = services;
         _collaborators = collaborators;
-        _appointments = appointments;
+        _availability = availability;
     }
 
     public async Task<ClientAppointmentAvailabilityDto> Handle(GetAppointmentAvailabilityQuery request, CancellationToken cancellationToken)
@@ -40,8 +41,8 @@ public sealed class GetAppointmentAvailabilityHandler : IRequestHandler<GetAppoi
             .ToList();
         var dayStartUtc = BranchTimeZone.ToUtc(request.Date, branch.TimeZoneId);
         var nextDayStartUtc = BranchTimeZone.ToUtc(request.Date.AddDays(1), branch.TimeZoneId);
-        var booked = await _appointments.GetByBranchAndRangeAsync(branch.Id, dayStartUtc, nextDayStartUtc, cancellationToken);
-        result.Slots.AddRange(AppointmentAvailabilityRules.GetAvailableSlots(request.Date, schedule.OpenTime, schedule.CloseTime, duration, candidates, booked, branch.TimeZoneId));
+        var availability = await ProfessionalAvailability.LoadAsync(_availability, candidates.Select(x => x.Id).ToList(), dayStartUtc, nextDayStartUtc, cancellationToken);
+        result.Slots.AddRange(AppointmentAvailabilityRules.GetAvailableSlots(request.Date, schedule.OpenTime, schedule.CloseTime, duration, candidates, availability, branch.TimeZoneId));
         return result;
     }
 }
@@ -56,21 +57,20 @@ internal static class AppointmentAvailabilityRules
         TimeOnly closeTime,
         TimeSpan duration,
         IReadOnlyCollection<BarberFlow.Domain.Entities.Collaborator> candidates,
-        IReadOnlyCollection<BarberFlow.Domain.Entities.Appointment> booked,
-        string? timeZoneId = null)
+        ProfessionalAvailability availability,
+        string timeZoneId)
     {
         var slots = new List<ClientAppointmentAvailabilitySlotDto>();
-        for (var slot = date.ToDateTime(openTime); slot.Add(duration).TimeOfDay <= closeTime.ToTimeSpan(); slot = slot.AddMinutes(30))
+        if (duration <= TimeSpan.Zero || closeTime <= openTime) return slots;
+        var closing = date.ToDateTime(closeTime);
+        for (var slot = date.ToDateTime(openTime); slot.Add(duration) <= closing; slot = slot.AddMinutes(30))
         {
             var startAtUtc = BranchTimeZone.ToUtc(DateOnly.FromDateTime(slot), TimeOnly.FromDateTime(slot), timeZoneId);
             if (startAtUtc <= DateTimeOffset.UtcNow) continue;
             var end = slot.Add(duration);
             var endAtUtc = BranchTimeZone.ToUtc(DateOnly.FromDateTime(end), TimeOnly.FromDateTime(end), timeZoneId);
             var assignedProfessional = candidates.FirstOrDefault(candidate =>
-                !booked.Any(appointment =>
-                    appointment.CollaboratorId == candidate.Id &&
-                    startAtUtc < appointment.EndDateTime &&
-                    endAtUtc > appointment.StartDateTime));
+                availability.CanAttend(candidate.Id, startAtUtc, endAtUtc, timeZoneId));
 
             if (assignedProfessional is not null)
                 slots.Add(new ClientAppointmentAvailabilitySlotDto

@@ -1,4 +1,5 @@
 using BarberFlow.Application.Common.Time;
+using BarberFlow.Application.Features.Appointments.Availability;
 using BarberFlow.Domain.Interfaces.Repositories;
 using MediatR;
 
@@ -16,14 +17,14 @@ public sealed class GetAppointmentAvailabilityCalendarHandler : IRequestHandler<
     private readonly IBranchRepository _branches;
     private readonly IServiceRepository _services;
     private readonly ICollaboratorRepository _collaborators;
-    private readonly IAppointmentRepository _appointments;
+    private readonly ICollaboratorAvailabilityRepository _availability;
 
-    public GetAppointmentAvailabilityCalendarHandler(IBranchRepository branches, IServiceRepository services, ICollaboratorRepository collaborators, IAppointmentRepository appointments)
+    public GetAppointmentAvailabilityCalendarHandler(IBranchRepository branches, IServiceRepository services, ICollaboratorRepository collaborators, ICollaboratorAvailabilityRepository availability)
     {
         _branches = branches;
         _services = services;
         _collaborators = collaborators;
-        _appointments = appointments;
+        _availability = availability;
     }
 
     public async Task<ClientAppointmentAvailabilityCalendarDto> Handle(GetAppointmentAvailabilityCalendarQuery request, CancellationToken cancellationToken)
@@ -47,13 +48,13 @@ public sealed class GetAppointmentAvailabilityCalendarHandler : IRequestHandler<
 
         var fromUtc = BranchTimeZone.ToUtc(request.From, branch.TimeZoneId);
         var toUtc = BranchTimeZone.ToUtc(request.To.AddDays(1), branch.TimeZoneId);
-        var booked = await _appointments.GetByBranchAndRangeAsync(branch.Id, fromUtc, toUtc, cancellationToken);
+        var availability = await ProfessionalAvailability.LoadAsync(_availability, candidates.Select(x => x.Id).ToList(), fromUtc, toUtc, cancellationToken);
         var duration = TimeSpan.FromTicks(services.Sum(service => service.Duration.Ticks));
         for (var date = request.From; date <= request.To; date = date.AddDays(1))
         {
             var schedule = branch.Schedules.SingleOrDefault(item => item.DayOfWeek == AppointmentAvailabilityRules.ScheduleDayOfWeek(date));
             if (schedule is null || schedule.IsClosed) continue;
-            if (AppointmentAvailabilityRules.GetAvailableSlots(date, schedule.OpenTime, schedule.CloseTime, duration, candidates, booked, branch.TimeZoneId).Count > 0)
+            if (AppointmentAvailabilityRules.GetAvailableSlots(date, schedule.OpenTime, schedule.CloseTime, duration, candidates, availability, branch.TimeZoneId).Count > 0)
                 result.AvailableDates.Add(date);
         }
         return result;

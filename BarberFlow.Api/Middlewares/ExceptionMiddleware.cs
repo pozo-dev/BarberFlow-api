@@ -64,6 +64,7 @@ public sealed class ExceptionMiddleware
             DuplicateBranchNameException => StatusCodes.Status409Conflict,
 
             AppointmentConflictException => StatusCodes.Status409Conflict,
+            AvailabilityConflictException => StatusCodes.Status409Conflict,
 
             ClientAppointmentCannotBeCancelledException => StatusCodes.Status409Conflict,
 

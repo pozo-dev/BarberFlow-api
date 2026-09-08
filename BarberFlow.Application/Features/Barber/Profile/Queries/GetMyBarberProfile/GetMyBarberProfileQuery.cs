@@ -49,6 +49,7 @@ public sealed class GetMyBarberProfileHandler
             Branches = collaborators.Select(collaborator => new BarberBranchDto
             {
                 Id = collaborator.BranchId,
+                CollaboratorId = collaborator.Id,
                 Name = collaborator.Branch.Name,
                 Address = collaborator.Branch.Address,
             }).ToList(),
@@ -65,6 +66,7 @@ public sealed class BarberProfileDto
 
 public sealed class BarberBranchDto
 {
+    public Guid CollaboratorId { get; init; }
     public Guid Id { get; init; }
     public string Name { get; init; } = string.Empty;
     public string Address { get; init; } = string.Empty;

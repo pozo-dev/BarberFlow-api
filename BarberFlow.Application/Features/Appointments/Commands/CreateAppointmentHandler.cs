@@ -1,5 +1,6 @@
 using BarberFlow.Application.Common.Interfaces;
 using BarberFlow.Application.Common.Time;
+using BarberFlow.Application.Features.Appointments.Availability;
 using BarberFlow.Application.Features.Appointments.DTOs;
 using BarberFlow.Application.Features.Appointments.Exceptions;
 using BarberFlow.Application.Features.Services.Exceptions;
@@ -17,11 +18,12 @@ public class CreateAppointmentHandler : IRequestHandler<CreateAppointmentCommand
     private readonly IUserRepository _users;
     private readonly IBranchRepository _branches;
     private readonly ICollaboratorRepository _collaborators;
+    private readonly ICollaboratorAvailabilityRepository _availability;
     private readonly IServiceRepository _services;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUser;
 
-    public CreateAppointmentHandler(IAppointmentRepository appointments, IAppointmentActivityRepository appointmentActivities, IUserRepository users, IBranchRepository branches, ICollaboratorRepository collaborators, IServiceRepository services, IUnitOfWork unitOfWork, ICurrentUserService currentUser)
+    public CreateAppointmentHandler(IAppointmentRepository appointments, IAppointmentActivityRepository appointmentActivities, IUserRepository users, IBranchRepository branches, ICollaboratorRepository collaborators, IServiceRepository services, IUnitOfWork unitOfWork, ICurrentUserService currentUser, ICollaboratorAvailabilityRepository availability)
     {
         _appointments = appointments;
         _appointmentActivities = appointmentActivities;
@@ -31,6 +33,7 @@ public class CreateAppointmentHandler : IRequestHandler<CreateAppointmentCommand
         _services = services;
         _unitOfWork = unitOfWork;
         _currentUser = currentUser;
+        _availability = availability;
     }
 
     public async Task<AppointmentDto> Handle(CreateAppointmentCommand request, CancellationToken cancellationToken)
@@ -65,13 +68,16 @@ public class CreateAppointmentHandler : IRequestHandler<CreateAppointmentCommand
             throw new InvalidOperationException("La hora seleccionada no est� disponible.");
 
         var candidates = await _collaborators.GetActiveByBranchIdAsync(branch.Id, cancellationToken);
+        if (input.StartDateTime <= DateTimeOffset.UtcNow) throw new AppointmentConflictException();
+        await using var mutation = await _availability.BeginMutationAsync(candidates.Select(x => x.Id).ToList(), cancellationToken);
+        var availability = await ProfessionalAvailability.LoadAsync(_availability, candidates.Select(x => x.Id).ToList(), input.StartDateTime, end, cancellationToken);
         var professionalIds = input.ProfessionalId.HasValue
             ? candidates.Where(x => x.Id == input.ProfessionalId.Value).Select(x => x.Id)
             : candidates.Select(x => x.Id);
         var professionalId = Guid.Empty;
         foreach (var candidateId in professionalIds)
         {
-            if (!await _appointments.ExistsOverlappingAppointmentAsync(branch.Id, candidateId, input.StartDateTime, end, cancellationToken))
+            if (availability.CanAttend(candidateId, input.StartDateTime, end, branch.TimeZoneId))
             {
                 professionalId = candidateId;
                 break;
@@ -89,6 +95,7 @@ public class CreateAppointmentHandler : IRequestHandler<CreateAppointmentCommand
             _currentUser.RoleId,
             newStartAtUtc: appointment.StartDateTime));
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await mutation.CommitAsync(cancellationToken);
 
         return new AppointmentDto { Id = appointment.Id, BranchId = branch.Id, ProfessionalId = professionalId, UserId = user.Id, StartDateTime = appointment.StartDateTime, EndDateTime = appointment.EndDateTime, Status = appointment.Status, ServiceIds = serviceIds, CreatedAt = appointment.CreatedAt };
     }

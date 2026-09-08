@@ -1,5 +1,4 @@
 using BarberFlow.Domain.Entities;
-using BarberFlow.Domain.Enums;
 using BarberFlow.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,17 +19,6 @@ public class AppointmentRepository : IAppointmentRepository
             .Include(a => a.AppointmentServices)
             .FirstOrDefaultAsync(a => a.Id == appointmentId, cancellationToken);
 
-    public Task<bool> ExistsOverlappingAppointmentAsync(Guid branchId, Guid collaboratorId, DateTimeOffset start, DateTimeOffset end, CancellationToken cancellationToken, Guid? excludedAppointmentId = null) =>
-        _context.Appointments
-            .AsNoTracking()
-            .AnyAsync(a =>
-                a.BranchId == branchId &&
-                a.CollaboratorId == collaboratorId &&
-                a.Status == AppointmentStatus.Scheduled &&
-                (!excludedAppointmentId.HasValue || a.Id != excludedAppointmentId.Value) &&
-                start < a.EndDateTime && end > a.StartDateTime,
-                cancellationToken);
-
     public Task<List<Appointment>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken) =>
         _context.Appointments
             .AsNoTracking()
@@ -47,11 +35,4 @@ public class AppointmentRepository : IAppointmentRepository
             .Include(a => a.AppointmentServices)
             .ToListAsync(cancellationToken);
 
-    public Task<List<Appointment>> GetByBranchAndRangeAsync(Guid branchId, DateTimeOffset fromUtc, DateTimeOffset toUtc, CancellationToken cancellationToken)
-    {
-        return _context.Appointments
-            .AsNoTracking()
-            .Where(a => a.BranchId == branchId && a.StartDateTime >= fromUtc && a.StartDateTime < toUtc && a.Status == AppointmentStatus.Scheduled)
-            .ToListAsync(cancellationToken);
-    }
 }

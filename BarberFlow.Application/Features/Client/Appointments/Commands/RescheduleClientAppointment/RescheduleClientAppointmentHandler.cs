@@ -1,5 +1,6 @@
 using BarberFlow.Application.Common.Interfaces;
 using BarberFlow.Application.Common.Time;
+using BarberFlow.Application.Features.Appointments.Availability;
 using BarberFlow.Application.Features.Client.Appointments;
 using BarberFlow.Domain.Entities;
 using BarberFlow.Domain.Enums;
@@ -17,10 +18,11 @@ public sealed class RescheduleClientAppointmentHandler : IRequestHandler<Resched
     private readonly IBranchRepository _branches;
     private readonly IServiceRepository _services;
     private readonly ICollaboratorRepository _collaborators;
+    private readonly ICollaboratorAvailabilityRepository _availability;
     private readonly ICurrentUserService _currentUser;
     private readonly IUnitOfWork _unitOfWork;
 
-    public RescheduleClientAppointmentHandler(IClientAppointmentRepository clientAppointments, IAppointmentRepository appointments, IAppointmentActivityRepository appointmentActivities, IBranchRepository branches, IServiceRepository services, ICollaboratorRepository collaborators, ICurrentUserService currentUser, IUnitOfWork unitOfWork)
+    public RescheduleClientAppointmentHandler(IClientAppointmentRepository clientAppointments, IAppointmentRepository appointments, IAppointmentActivityRepository appointmentActivities, IBranchRepository branches, IServiceRepository services, ICollaboratorRepository collaborators, ICurrentUserService currentUser, IUnitOfWork unitOfWork, ICollaboratorAvailabilityRepository availability)
     {
         _clientAppointments = clientAppointments;
         _appointments = appointments;
@@ -30,6 +32,7 @@ public sealed class RescheduleClientAppointmentHandler : IRequestHandler<Resched
         _collaborators = collaborators;
         _currentUser = currentUser;
         _unitOfWork = unitOfWork;
+        _availability = availability;
     }
 
     public async Task<Guid> Handle(RescheduleClientAppointmentCommand request, CancellationToken cancellationToken)
@@ -54,11 +57,13 @@ public sealed class RescheduleClientAppointmentHandler : IRequestHandler<Resched
         if (schedule is null || schedule.IsClosed || localStart.TimeOfDay < schedule.OpenTime.ToTimeSpan() || localEnd.Date != localStart.Date || localEnd.TimeOfDay > schedule.CloseTime.ToTimeSpan()) throw new ClientAppointmentRescheduleConflictException();
 
         var candidates = await _collaborators.GetActiveByBranchIdAsync(branch.Id, cancellationToken);
+        await using var mutation = await _availability.BeginMutationAsync(candidates.Select(x => x.Id).Append(original.CollaboratorId).Distinct().ToList(), cancellationToken);
+        var availability = await ProfessionalAvailability.LoadAsync(_availability, candidates.Select(x => x.Id).ToList(), request.StartDateTime, end, cancellationToken, original.Id);
         var candidateIds = request.ProfessionalId.HasValue ? candidates.Where(item => item.Id == request.ProfessionalId.Value).Select(item => item.Id) : candidates.Select(item => item.Id);
         var professionalId = Guid.Empty;
         foreach (var candidateId in candidateIds)
         {
-            if (!await _appointments.ExistsOverlappingAppointmentAsync(branch.Id, candidateId, request.StartDateTime, end, cancellationToken, original.Id))
+            if (availability.CanAttend(candidateId, request.StartDateTime, end, branch.TimeZoneId))
             {
                 professionalId = candidateId;
                 break;
@@ -86,6 +91,7 @@ public sealed class RescheduleClientAppointmentHandler : IRequestHandler<Resched
             newStartAtUtc: replacement.StartDateTime,
             relatedAppointmentId: original.Id));
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await mutation.CommitAsync(cancellationToken);
         return replacement.Id;
     }
 }
