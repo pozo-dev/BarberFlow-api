@@ -1,7 +1,5 @@
-﻿namespace BarberFlow.Application.Features.Appointments.Exceptions
+namespace BarberFlow.Application.Features.Appointments.Exceptions;
+public class UserNotFoundException : Exception
 {
-    public class UserNotFoundException : Exception
-    {
-        public UserNotFoundException() : base("User not found.") { }
-    }
+    public UserNotFoundException() : base("User not found.") { }
 }

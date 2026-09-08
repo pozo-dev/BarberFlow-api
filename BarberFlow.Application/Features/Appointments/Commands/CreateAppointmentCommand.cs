@@ -1,10 +1,8 @@
-﻿using BarberFlow.Application.Features.Appointments.DTOs;
+using BarberFlow.Application.Features.Appointments.DTOs;
 using MediatR;
 
-namespace BarberFlow.Application.Features.Appointments.Commands
+namespace BarberFlow.Application.Features.Appointments.Commands;
+public class CreateAppointmentCommand : IRequest<AppointmentDto>
 {
-    public class CreateAppointmentCommand : IRequest<AppointmentDto>
-    {
-        public CreateAppointmentDto Appointment { get; set; }
-    }
+    public CreateAppointmentDto Appointment { get; set; }
 }

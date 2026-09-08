@@ -1,7 +1,5 @@
-﻿namespace BarberFlow.Application.Features.UserProfiles.RegisterUserProfile
+namespace BarberFlow.Application.Features.UserProfiles.RegisterUserProfile;
+public class RegisterUserProfileResponseDto
 {
-    public class RegisterUserProfileResponseDto
-    {
-        public Guid UserProfileId { get; set; }
-    }
+    public Guid UserProfileId { get; set; }
 }

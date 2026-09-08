@@ -1,11 +1,9 @@
-﻿namespace BarberFlow.Domain.Enums
+namespace BarberFlow.Domain.Enums;
+public enum AppointmentStatus
 {
-    public enum AppointmentStatus
-    {
-        Scheduled = 1,
-        Completed = 2,
-        Cancelled = 3,
-        NoShow = 4,
-        Rescheduled = 5
-    }
+    Scheduled = 1,
+    Completed = 2,
+    Cancelled = 3,
+    NoShow = 4,
+    Rescheduled = 5
 }

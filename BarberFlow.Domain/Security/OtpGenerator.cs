@@ -1,17 +1,15 @@
-﻿using System.Security.Cryptography;
+using System.Security.Cryptography;
 
-namespace BarberFlow.Domain.Security
+namespace BarberFlow.Domain.Security;
+public static class OtpGenerator
 {
-    public static class OtpGenerator
+    public static string Generate(int digits = 6)
     {
-        public static string Generate(int digits = 6)
-        {
-            var min = (int)Math.Pow(10, digits - 1);
-            var max = (int)Math.Pow(10, digits);
+        var min = (int)Math.Pow(10, digits - 1);
+        var max = (int)Math.Pow(10, digits);
 
-            return RandomNumberGenerator
-                .GetInt32(min, max)
-                .ToString();
-        }
+        return RandomNumberGenerator
+            .GetInt32(min, max)
+            .ToString();
     }
 }

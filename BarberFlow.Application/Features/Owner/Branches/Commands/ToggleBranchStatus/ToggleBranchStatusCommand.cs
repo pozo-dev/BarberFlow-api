@@ -1,9 +1,7 @@
-﻿using MediatR;
+using MediatR;
 
-namespace BarberFlow.Application.Features.Branches.Commands.ToggleBranchStatus
+namespace BarberFlow.Application.Features.Branches.Commands.ToggleBranchStatus;
+public class ToggleBranchStatusCommand : IRequest
 {
-    public class ToggleBranchStatusCommand : IRequest
-    {
-        public Guid Id { get; set; }
-    }
+    public Guid Id { get; set; }
 }

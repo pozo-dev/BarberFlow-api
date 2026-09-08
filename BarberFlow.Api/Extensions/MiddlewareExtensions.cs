@@ -1,13 +1,11 @@
-﻿using BarberFlow.Api.Middlewares;
+using BarberFlow.Api.Middlewares;
 
-namespace BarberFlow.Api.Extensions
+namespace BarberFlow.Api.Extensions;
+public static class MiddlewareExtensions
 {
-    public static class MiddlewareExtensions
+    public static IApplicationBuilder UseGlobalExceptionHandling(
+        this IApplicationBuilder app)
     {
-        public static IApplicationBuilder UseGlobalExceptionHandling(
-            this IApplicationBuilder app)
-        {
-            return app.UseMiddleware<ExceptionMiddleware>();
-        }
+        return app.UseMiddleware<ExceptionMiddleware>();
     }
 }

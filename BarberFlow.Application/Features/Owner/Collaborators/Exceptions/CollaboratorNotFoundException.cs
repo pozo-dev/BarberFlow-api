@@ -1,7 +1,5 @@
-namespace BarberFlow.Application.Features.Collaborators.Exceptions
+namespace BarberFlow.Application.Features.Collaborators.Exceptions;
+public class CollaboratorNotFoundException : Exception
 {
-    public class CollaboratorNotFoundException : Exception
-    {
-        public CollaboratorNotFoundException() : base("Colaborador no encontrado.") { }
-    }
+    public CollaboratorNotFoundException() : base("Colaborador no encontrado.") { }
 }

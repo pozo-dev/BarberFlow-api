@@ -1,11 +1,9 @@
-﻿namespace BarberFlow.Domain.Constants
+namespace BarberFlow.Domain.Constants;
+public class AuthenticationSettings
 {
-    public class AuthenticationSettings
-    {
-        public const int OtpExpirationMinutes = 3;
+    public const int OtpExpirationMinutes = 3;
 
-        public const int OtpMaxAttempts = 5;
+    public const int OtpMaxAttempts = 5;
 
-        public const int RefreshTokenExpirationDays = 7;
-    }
+    public const int RefreshTokenExpirationDays = 7;
 }

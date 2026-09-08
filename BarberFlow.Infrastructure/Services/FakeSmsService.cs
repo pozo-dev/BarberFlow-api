@@ -1,13 +1,11 @@
-﻿using BarberFlow.Domain.Interfaces.Services;
+using BarberFlow.Domain.Interfaces.Services;
 
-namespace BarberFlow.Infrastructure.Services
+namespace BarberFlow.Infrastructure.Services;
+public class FakeSmsService : ISmsService
 {
-    public class FakeSmsService : ISmsService
+    public Task SendAsync(string phoneNumber, string message)
     {
-        public Task SendAsync(string phoneNumber, string message)
-        {
-            Console.WriteLine($"[SMS SIMULADO] → {phoneNumber}: {message}");
-            return Task.CompletedTask;
-        }
+        Console.WriteLine($"[SMS SIMULADO] → {phoneNumber}: {message}");
+        return Task.CompletedTask;
     }
 }

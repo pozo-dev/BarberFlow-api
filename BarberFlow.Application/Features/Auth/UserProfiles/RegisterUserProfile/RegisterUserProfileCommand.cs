@@ -1,13 +1,11 @@
-﻿using MediatR;
+using MediatR;
 
-namespace BarberFlow.Application.Features.UserProfiles.RegisterUserProfile
+namespace BarberFlow.Application.Features.UserProfiles.RegisterUserProfile;
+public class RegisterUserProfileCommand : IRequest<RegisterUserProfileResponseDto>
 {
-    public class RegisterUserProfileCommand : IRequest<RegisterUserProfileResponseDto>
-    {
-        public Guid UserId { get; set; }
+    public Guid UserId { get; set; }
 
-        public int RoleId { get; set; }
+    public int RoleId { get; set; }
 
-        public Guid? BarberShopId { get; set; }
-    }
+    public Guid? BarberShopId { get; set; }
 }

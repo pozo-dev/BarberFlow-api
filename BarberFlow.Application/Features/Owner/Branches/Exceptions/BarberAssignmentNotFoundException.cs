@@ -1,10 +1,8 @@
-﻿namespace BarberFlow.Application.Features.Branches.Exceptions
+namespace BarberFlow.Application.Features.Branches.Exceptions;
+public class BarberAssignmentNotFoundException : Exception
 {
-    public class BarberAssignmentNotFoundException : Exception
+    public BarberAssignmentNotFoundException()
+        : base("La asignación del barbero no fue encontrada.")
     {
-        public BarberAssignmentNotFoundException()
-            : base("La asignación del barbero no fue encontrada.")
-        {
-        }
     }
 }

@@ -1,17 +1,15 @@
 using BarberFlow.Domain.Enums;
 
-namespace BarberFlow.Application.Features.Appointments.DTOs
+namespace BarberFlow.Application.Features.Appointments.DTOs;
+public class AppointmentDto
 {
-    public class AppointmentDto
-    {
-        public Guid Id { get; set; }
-        public Guid BranchId { get; set; }
-        public Guid? ProfessionalId { get; set; }
-        public Guid UserId { get; set; }
-        public DateTimeOffset StartDateTime { get; set; }
-        public DateTimeOffset EndDateTime { get; set; }
-        public AppointmentStatus Status { get; set; }
-        public List<Guid> ServiceIds { get; set; } = new();
-        public DateTimeOffset CreatedAt { get; set; }
-    }
+    public Guid Id { get; set; }
+    public Guid BranchId { get; set; }
+    public Guid? ProfessionalId { get; set; }
+    public Guid UserId { get; set; }
+    public DateTimeOffset StartDateTime { get; set; }
+    public DateTimeOffset EndDateTime { get; set; }
+    public AppointmentStatus Status { get; set; }
+    public List<Guid> ServiceIds { get; set; } = new();
+    public DateTimeOffset CreatedAt { get; set; }
 }

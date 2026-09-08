@@ -1,12 +1,10 @@
-﻿using BarberFlow.Application.Features.Auth.DTOs;
+using BarberFlow.Application.Features.Auth.DTOs;
 using MediatR;
 
-namespace BarberFlow.Application.Features.Auth.Commands.RefreshUserToken
+namespace BarberFlow.Application.Features.Auth.Commands.RefreshUserToken;
+public class RefreshTokenCommand: IRequest<AuthResponseDto>
 {
-    public class RefreshTokenCommand: IRequest<AuthResponseDto>
-    {
-        public string DeviceId { get; set; }
+    public string DeviceId { get; set; }
 
-        public string RefreshToken { get; set; }
-    }
+    public string RefreshToken { get; set; }
 }

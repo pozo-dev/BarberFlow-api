@@ -1,69 +1,67 @@
-﻿using BarberFlow.Application.Common.Exceptions;
+using BarberFlow.Application.Common.Exceptions;
 using BarberFlow.Application.Common.Interfaces;
 using BarberFlow.Application.Features.BarberShops.Exceptions;
 using BarberFlow.Domain.Interfaces;
 using MediatR;
 
-namespace BarberFlow.Application.Features.BarberShops.Commands.UpdateBarberShop
+namespace BarberFlow.Application.Features.BarberShops.Commands.UpdateBarberShop;
+public class UpdateBarberShopCommandHandler
+    : IRequestHandler<UpdateBarberShopCommand, UpdateBarberShopResponseDto>
 {
-    public class UpdateBarberShopCommandHandler
-        : IRequestHandler<UpdateBarberShopCommand, UpdateBarberShopResponseDto>
+    private readonly IBarberShopRepository _barberShopRepository;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public UpdateBarberShopCommandHandler(
+        IBarberShopRepository barberShopRepository,
+        ICurrentUserService currentUserService,
+        IUnitOfWork unitOfWork)
     {
-        private readonly IBarberShopRepository _barberShopRepository;
-        private readonly ICurrentUserService _currentUserService;
-        private readonly IUnitOfWork _unitOfWork;
+        _barberShopRepository = barberShopRepository;
+        _currentUserService = currentUserService;
+        _unitOfWork = unitOfWork;
+    }
 
-        public UpdateBarberShopCommandHandler(
-            IBarberShopRepository barberShopRepository,
-            ICurrentUserService currentUserService,
-            IUnitOfWork unitOfWork)
+    public async Task<UpdateBarberShopResponseDto> Handle(
+        UpdateBarberShopCommand request,
+        CancellationToken cancellationToken)
+    {
+        ValidateImages(request.Logo, request.Banner);
+
+        var barberShop =
+            await _barberShopRepository.GetByOwnerUserIdAsync(
+                _currentUserService.UserId,
+                cancellationToken);
+
+        if (barberShop is null)
         {
-            _barberShopRepository = barberShopRepository;
-            _currentUserService = currentUserService;
-            _unitOfWork = unitOfWork;
+            throw new BarberShopNotFoundException();
         }
 
-        public async Task<UpdateBarberShopResponseDto> Handle(
-            UpdateBarberShopCommand request,
-            CancellationToken cancellationToken)
+        barberShop.Update(
+            request.Name,
+            request.Description,
+            request.Logo,
+            request.Banner);
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return new UpdateBarberShopResponseDto
         {
-            ValidateImages(request.Logo, request.Banner);
+            BarberShopId = barberShop.Id
+        };
+    }
 
-            var barberShop =
-                await _barberShopRepository.GetByOwnerUserIdAsync(
-                    _currentUserService.UserId,
-                    cancellationToken);
-
-            if (barberShop is null)
-            {
-                throw new BarberShopNotFoundException();
-            }
-
-            barberShop.Update(
-                request.Name,
-                request.Description,
-                request.Logo,
-                request.Banner);
-
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-            return new UpdateBarberShopResponseDto
-            {
-                BarberShopId = barberShop.Id
-            };
+    private static void ValidateImages(byte[] logo, byte[] banner)
+    {
+        if (logo.Length == 0)
+        {
+            throw new ValidationException("El logo es requerido.");
         }
 
-        private static void ValidateImages(byte[] logo, byte[] banner)
+        if (banner.Length == 0)
         {
-            if (logo.Length == 0)
-            {
-                throw new ValidationException("El logo es requerido.");
-            }
-
-            if (banner.Length == 0)
-            {
-                throw new ValidationException("El banner es requerido.");
-            }
+            throw new ValidationException("El banner es requerido.");
         }
     }
 }

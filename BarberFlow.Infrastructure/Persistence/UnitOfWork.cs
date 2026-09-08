@@ -1,19 +1,17 @@
-﻿using BarberFlow.Domain.Interfaces;
+using BarberFlow.Domain.Interfaces;
 
-namespace BarberFlow.Infrastructure.Persistence
+namespace BarberFlow.Infrastructure.Persistence;
+public class UnitOfWork : IUnitOfWork
 {
-    public class UnitOfWork : IUnitOfWork
+    private readonly BarberFlowDbContext _context;
+
+    public UnitOfWork(BarberFlowDbContext context)
     {
-        private readonly BarberFlowDbContext _context;
+        _context = context;
+    }
 
-        public UnitOfWork(BarberFlowDbContext context)
-        {
-            _context = context;
-        }
-
-        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
-        {
-            return await _context.SaveChangesAsync(cancellationToken);
-        }
+    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
+    {
+        return await _context.SaveChangesAsync(cancellationToken);
     }
 }

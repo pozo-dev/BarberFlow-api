@@ -1,4 +1,4 @@
-﻿using BarberFlow.Application.Common.Exceptions;
+using BarberFlow.Application.Common.Exceptions;
 using BarberFlow.Application.Common.Interfaces;
 using BarberFlow.Application.Common.Security;
 using BarberFlow.Application.Features.Auth.DTOs;
@@ -10,185 +10,183 @@ using BarberFlow.Domain.Interfaces.Repositories;
 using BarberFlow.Domain.Security;
 using MediatR;
 
-namespace BarberFlow.Application.Features.Auth.Commands.VerifyOtp
+namespace BarberFlow.Application.Features.Auth.Commands.VerifyOtp;
+public class VerifyOtpHandler : IRequestHandler<VerifyOtpCommand, AuthResponseDto>
 {
-    public class VerifyOtpHandler : IRequestHandler<VerifyOtpCommand, AuthResponseDto>
+    private readonly IUserRepository _userRepository;
+    private readonly IUserProfileRepository _userProfileRepository;
+    private readonly IOtpCodeRepository _otpCodeRepository;
+    private readonly IRefreshTokenRepository _refreshTokenRepository;
+    private readonly IJwtService _jwtService;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public VerifyOtpHandler(
+        IUserRepository userRepository,
+        IUserProfileRepository userProfileRepository,
+        IOtpCodeRepository otpRepository,
+        IRefreshTokenRepository refreshTokenRepository,
+        IJwtService jwtService,
+        IUnitOfWork unitOfWork,
+        ITokenEncryptionService tokenEncryptionService)
     {
-        private readonly IUserRepository _userRepository;
-        private readonly IUserProfileRepository _userProfileRepository;
-        private readonly IOtpCodeRepository _otpCodeRepository;
-        private readonly IRefreshTokenRepository _refreshTokenRepository;
-        private readonly IJwtService _jwtService;
-        private readonly IUnitOfWork _unitOfWork;
+        _userRepository = userRepository;
+        _userProfileRepository = userProfileRepository;
+        _otpCodeRepository = otpRepository;
+        _refreshTokenRepository = refreshTokenRepository;
+        _jwtService = jwtService;
+        _unitOfWork = unitOfWork;
+    }
 
-        public VerifyOtpHandler(
-            IUserRepository userRepository,
-            IUserProfileRepository userProfileRepository,
-            IOtpCodeRepository otpRepository,
-            IRefreshTokenRepository refreshTokenRepository,
-            IJwtService jwtService,
-            IUnitOfWork unitOfWork,
-            ITokenEncryptionService tokenEncryptionService)
+    public async Task<AuthResponseDto> Handle(VerifyOtpCommand request, CancellationToken cancellationToken)
+    {
+        ValidateRequest(request);
+
+        var otp = await GetValidOtpAsync(
+            request.OtpId,
+            cancellationToken);
+
+        var user = await GetUserAsync(
+            otp.UserId,
+            cancellationToken);
+
+        var userProfile = await GetUserProfileAsync(
+            otp,
+            cancellationToken);
+
+        await RevokeRefreshTokensAsync(
+            user.Id,
+            request.DeviceId,
+            cancellationToken);
+
+        var refreshToken = CreateRefreshToken(
+            user,
+            userProfile,
+            request.DeviceId,
+            out var refreshTokenValue);
+
+        _refreshTokenRepository.Add(refreshToken);
+
+        otp.MarkAsUsed();
+
+        await _unitOfWork.SaveChangesAsync(
+            cancellationToken);
+
+        return CreateAuthResponse(
+            user,
+            userProfile,
+            refreshTokenValue);
+    }
+
+    private static void ValidateRequest(VerifyOtpCommand request)
+    {
+        if (request.OtpId == Guid.Empty)
+            throw new ValidationException("OtpId is required.");
+
+        if (string.IsNullOrWhiteSpace(request.DeviceId))
+            throw new ValidationException("DeviceId is required.");
+
+    }
+
+    private async Task<UserProfile> GetUserProfileAsync(
+        OtpCode otp,
+        CancellationToken cancellationToken)
+    {
+        if (!otp.RequestedUserProfileId.HasValue)
+            throw new InvalidCredentialsException();
+
+        var profile = await _userProfileRepository
+            .GetActiveByIdAndUserIdAsync(otp.RequestedUserProfileId.Value, otp.UserId, cancellationToken);
+
+        if (profile == null)
+            throw new InvalidCredentialsException();
+
+        return profile;
+    }
+
+    private async Task RevokeRefreshTokensAsync(
+        Guid userId,
+        string deviceId,
+        CancellationToken cancellationToken)
+    {
+        var activeTokens = await _refreshTokenRepository
+            .GetActiveByUserIdAsync(userId, cancellationToken);
+
+        foreach (var token in activeTokens.Where(x =>
+                     x.DeviceId == deviceId &&
+                     x.IsActive()))
         {
-            _userRepository = userRepository;
-            _userProfileRepository = userProfileRepository;
-            _otpCodeRepository = otpRepository;
-            _refreshTokenRepository = refreshTokenRepository;
-            _jwtService = jwtService;
-            _unitOfWork = unitOfWork;
+            token.Revoke(RevocationReasons.Replaced);
         }
+    }
 
-        public async Task<AuthResponseDto> Handle(VerifyOtpCommand request, CancellationToken cancellationToken)
+    private RefreshToken CreateRefreshToken(
+        User user,
+        UserProfile userProfile,
+        string deviceId,
+        out string refreshTokenValue)
+    {
+        refreshTokenValue = _jwtService.GenerateRefreshToken();
+
+        var refreshTokenHash = Sha256Hasher.Hash(refreshTokenValue);
+
+        return RefreshToken.Create(
+            user.Id,
+            userProfile.Id,
+            refreshTokenHash,
+            DateTimeOffset.UtcNow.AddDays(AuthenticationSettings.RefreshTokenExpirationDays),
+            deviceId);
+    }
+
+    private AuthResponseDto CreateAuthResponse(
+        User user,
+        UserProfile userProfile,
+        string refreshToken)
+    {
+        var accessToken = _jwtService.GenerateAccessToken(user, userProfile);
+        var accessTokenExpiration = _jwtService.GetAccessTokenExpiration();
+
+        return new AuthResponseDto
         {
-            ValidateRequest(request);
+            AccessToken = accessToken,
+            RefreshToken = refreshToken,
+            AccessTokenExpiration = accessTokenExpiration
+        };
+    }
 
-            var otp = await GetValidOtpAsync(
-                request.OtpId,
-                cancellationToken);
+    private async Task<User> GetUserAsync(
+        Guid userId,
+        CancellationToken cancellationToken)
+    {
+        var user = await _userRepository.GetByIdAsync(
+            userId,
+            cancellationToken);
 
-            var user = await GetUserAsync(
-                otp.UserId,
-                cancellationToken);
+        if (user == null || !user.IsActive)
+            throw new InvalidCredentialsException();
 
-            var userProfile = await GetUserProfileAsync(
-                otp,
-                cancellationToken);
+        return user;
+    }
 
-            await RevokeRefreshTokensAsync(
-                user.Id,
-                request.DeviceId,
-                cancellationToken);
+    private async Task<OtpCode> GetValidOtpAsync(
+        Guid otpId,
+        CancellationToken cancellationToken)
+    {
+        var otp = await _otpCodeRepository.GetByIdAsync(
+            otpId,
+            cancellationToken);
 
-            var refreshToken = CreateRefreshToken(
-                user,
-                userProfile,
-                request.DeviceId,
-                out var refreshTokenValue);
+        if (otp == null)
+            throw new InvalidCredentialsException();
 
-            _refreshTokenRepository.Add(refreshToken);
+        if (otp.IsUsed)
+            throw new InvalidCredentialsException();
 
-            otp.MarkAsUsed();
+        if (otp.IsBlocked(AuthenticationSettings.OtpMaxAttempts))
+            throw new InvalidCredentialsException();
 
-            await _unitOfWork.SaveChangesAsync(
-                cancellationToken);
+        if (otp.ExpiresAt <= DateTimeOffset.UtcNow)
+            throw new InvalidCredentialsException();
 
-            return CreateAuthResponse(
-                user,
-                userProfile,
-                refreshTokenValue);
-        }
-
-        private static void ValidateRequest(VerifyOtpCommand request)
-        {
-            if (request.OtpId == Guid.Empty)
-                throw new ValidationException("OtpId is required.");
-
-            if (string.IsNullOrWhiteSpace(request.DeviceId))
-                throw new ValidationException("DeviceId is required.");
-
-        }
-
-        private async Task<UserProfile> GetUserProfileAsync(
-            OtpCode otp,
-            CancellationToken cancellationToken)
-        {
-            if (!otp.RequestedUserProfileId.HasValue)
-                throw new InvalidCredentialsException();
-
-            var profile = await _userProfileRepository
-                .GetActiveByIdAndUserIdAsync(otp.RequestedUserProfileId.Value, otp.UserId, cancellationToken);
-
-            if (profile == null)
-                throw new InvalidCredentialsException();
-
-            return profile;
-        }
-
-        private async Task RevokeRefreshTokensAsync(
-            Guid userId,
-            string deviceId,
-            CancellationToken cancellationToken)
-        {
-            var activeTokens = await _refreshTokenRepository
-                .GetActiveByUserIdAsync(userId, cancellationToken);
-
-            foreach (var token in activeTokens.Where(x =>
-                         x.DeviceId == deviceId &&
-                         x.IsActive()))
-            {
-                token.Revoke(RevocationReasons.Replaced);
-            }
-        }
-
-        private RefreshToken CreateRefreshToken(
-            User user,
-            UserProfile userProfile,
-            string deviceId,
-            out string refreshTokenValue)
-        {
-            refreshTokenValue = _jwtService.GenerateRefreshToken();
-
-            var refreshTokenHash = Sha256Hasher.Hash(refreshTokenValue);
-
-            return RefreshToken.Create(
-                user.Id,
-                userProfile.Id,
-                refreshTokenHash,
-                DateTimeOffset.UtcNow.AddDays(AuthenticationSettings.RefreshTokenExpirationDays),
-                deviceId);
-        }
-
-        private AuthResponseDto CreateAuthResponse(
-            User user,
-            UserProfile userProfile,
-            string refreshToken)
-        {
-            var accessToken = _jwtService.GenerateAccessToken(user, userProfile);
-            var accessTokenExpiration = _jwtService.GetAccessTokenExpiration();
-
-            return new AuthResponseDto
-            {
-                AccessToken = accessToken,
-                RefreshToken = refreshToken,
-                AccessTokenExpiration = accessTokenExpiration
-            };
-        }
-
-        private async Task<User> GetUserAsync(
-            Guid userId,
-            CancellationToken cancellationToken)
-        {
-            var user = await _userRepository.GetByIdAsync(
-                userId,
-                cancellationToken);
-
-            if (user == null || !user.IsActive)
-                throw new InvalidCredentialsException();
-
-            return user;
-        }
-
-        private async Task<OtpCode> GetValidOtpAsync(
-            Guid otpId,
-            CancellationToken cancellationToken)
-        {
-            var otp = await _otpCodeRepository.GetByIdAsync(
-                otpId,
-                cancellationToken);
-
-            if (otp == null)
-                throw new InvalidCredentialsException();
-
-            if (otp.IsUsed)
-                throw new InvalidCredentialsException();
-
-            if (otp.IsBlocked(AuthenticationSettings.OtpMaxAttempts))
-                throw new InvalidCredentialsException();
-
-            if (otp.ExpiresAt <= DateTimeOffset.UtcNow)
-                throw new InvalidCredentialsException();
-
-            return otp;
-        }
+        return otp;
     }
 }

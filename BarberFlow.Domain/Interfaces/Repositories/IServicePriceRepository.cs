@@ -1,7 +1,5 @@
-﻿namespace BarberFlow.Domain.Interfaces.Repositories
+namespace BarberFlow.Domain.Interfaces.Repositories;
+public interface IServicePriceRepository
 {
-    public interface IServicePriceRepository
-    {
-        Task<Dictionary<Guid, decimal>> GetCurrentPricesAsync(IReadOnlyCollection<Guid> ids, CancellationToken cancellationToken);
-    }
+    Task<Dictionary<Guid, decimal>> GetCurrentPricesAsync(IReadOnlyCollection<Guid> ids, CancellationToken cancellationToken);
 }

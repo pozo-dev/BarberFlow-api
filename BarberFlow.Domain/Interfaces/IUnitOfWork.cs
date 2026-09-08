@@ -1,7 +1,5 @@
-﻿namespace BarberFlow.Domain.Interfaces
+namespace BarberFlow.Domain.Interfaces;
+public interface IUnitOfWork
 {
-    public interface IUnitOfWork
-    {
-        Task<int> SaveChangesAsync(CancellationToken cancellationToken);
-    }
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

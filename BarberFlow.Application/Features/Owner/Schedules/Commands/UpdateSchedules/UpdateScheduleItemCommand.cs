@@ -1,15 +1,13 @@
-namespace BarberFlow.Application.Features.Schedules.Commands.UpdateSchedules
+namespace BarberFlow.Application.Features.Schedules.Commands.UpdateSchedules;
+public class UpdateScheduleItemCommand
 {
-    public class UpdateScheduleItemCommand
-    {
-        public Guid ScheduleId { get; set; }
+    public Guid ScheduleId { get; set; }
 
-        public BarberFlow.Domain.Enums.ScheduleDay DayOfWeek { get; set; }
+    public BarberFlow.Domain.Enums.ScheduleDay DayOfWeek { get; set; }
 
-        public TimeSpan OpenTime { get; set; }
+    public TimeSpan OpenTime { get; set; }
 
-        public TimeSpan CloseTime { get; set; }
+    public TimeSpan CloseTime { get; set; }
 
-        public bool IsClosed { get; set; }
-    }
+    public bool IsClosed { get; set; }
 }

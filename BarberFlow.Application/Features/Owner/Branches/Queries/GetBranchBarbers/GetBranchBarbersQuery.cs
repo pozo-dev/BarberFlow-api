@@ -1,10 +1,8 @@
-﻿using MediatR;
+using MediatR;
 
-namespace BarberFlow.Application.Features.Branches.Queries.GetBranchBarbers
+namespace BarberFlow.Application.Features.Branches.Queries.GetBranchBarbers;
+public class GetBranchBarbersQuery
+    : IRequest<List<BranchBarberDto>>
 {
-    public class GetBranchBarbersQuery
-        : IRequest<List<BranchBarberDto>>
-    {
-        public Guid BranchId { get; set; }
-    }
+    public Guid BranchId { get; set; }
 }

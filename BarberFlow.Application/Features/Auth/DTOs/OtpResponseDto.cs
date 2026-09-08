@@ -1,8 +1,6 @@
-﻿namespace BarberFlow.Application.Features.Auth.DTOs
+namespace BarberFlow.Application.Features.Auth.DTOs;
+public class OtpResponseDto
 {
-    public class OtpResponseDto
-    {
-        public Guid OtpId { get; set; }
-        public DateTimeOffset ExpiresAt { get; set; }
-    }
+    public Guid OtpId { get; set; }
+    public DateTimeOffset ExpiresAt { get; set; }
 }

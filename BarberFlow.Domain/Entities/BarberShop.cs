@@ -1,114 +1,112 @@
-﻿namespace BarberFlow.Domain.Entities
+namespace BarberFlow.Domain.Entities;
+public class BarberShop
 {
-    public class BarberShop
+    public Guid Id { get; private set; }
+
+    public Guid OwnerUserId { get; private set; }
+
+    public string Name { get; private set; }
+
+    public string Description { get; private set; }
+
+    public byte[] Logo { get; private set; } = Array.Empty<byte>();
+
+    public byte[] Banner { get; private set; } = Array.Empty<byte>();
+
+    public bool IsActive { get; private set; }
+
+    public DateTimeOffset CreatedAt { get; private set; }
+
+    public ICollection<Service> Services { get; private set; }
+
+    public ICollection<UserProfile> Barbers { get; private set; }
+
+    public ICollection<Branch> Branches { get; private set; }
+
+    private BarberShop()
     {
-        public Guid Id { get; private set; }
+        Services = new List<Service>();
+        Barbers = new List<UserProfile>();
+        Branches = new List<Branch>();
+    }
 
-        public Guid OwnerUserId { get; private set; }
+    private BarberShop(
+        Guid ownerUserId,
+        string name,
+        string description,
+        byte[] logo,
+        byte[] banner)
+    {
+        Id = Guid.NewGuid();
 
-        public string Name { get; private set; }
+        OwnerUserId = ownerUserId;
 
-        public string Description { get; private set; }
+        Name = name.Trim();
 
-        public byte[] Logo { get; private set; } = Array.Empty<byte>();
+        Description = description.Trim();
 
-        public byte[] Banner { get; private set; } = Array.Empty<byte>();
+        Logo = logo;
 
-        public bool IsActive { get; private set; }
+        Banner = banner;
 
-        public DateTimeOffset CreatedAt { get; private set; }
+        IsActive = true;
 
-        public ICollection<Service> Services { get; private set; }
+        CreatedAt = DateTimeOffset.UtcNow;
 
-        public ICollection<UserProfile> Barbers { get; private set; }
+        Services = new List<Service>();
+        Barbers = new List<UserProfile>();
+        Branches = new List<Branch>();
+    }
 
-        public ICollection<Branch> Branches { get; private set; }
+    public static BarberShop Create(
+        Guid ownerUserId,
+        string name,
+        string description,
+        byte[] logo,
+        byte[] banner)
+    {
+        ValidateDetails(name, description);
+        return new BarberShop(ownerUserId, name, description, logo, banner);
+    }
 
-        private BarberShop()
-        {
-            Services = new List<Service>();
-            Barbers = new List<UserProfile>();
-            Branches = new List<Branch>();
-        }
+    public void Update(
+        string name,
+        string description,
+        byte[] logo,
+        byte[] banner)
+    {
+        ValidateDetails(name, description);
+        Name = name.Trim();
 
-        private BarberShop(
-            Guid ownerUserId,
-            string name,
-            string description,
-            byte[] logo,
-            byte[] banner)
-        {
-            Id = Guid.NewGuid();
+        Description = description.Trim();
 
-            OwnerUserId = ownerUserId;
+        Logo = logo;
 
-            Name = name.Trim();
+        Banner = banner;
+    }
 
-            Description = description.Trim();
+    private static void ValidateDetails(string name, string description)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("El nombre de la barbería es requerido.");
 
-            Logo = logo;
+        if (name.Trim().Length > 150)
+            throw new ArgumentException("El nombre de la barbería no puede superar 150 caracteres.");
 
-            Banner = banner;
+        if (string.IsNullOrWhiteSpace(description))
+            throw new ArgumentException("La descripción de la barbería es requerida.");
 
-            IsActive = true;
+        if (description.Trim().Length > 500)
+            throw new ArgumentException("La descripción de la barbería no puede superar 500 caracteres.");
+    }
 
-            CreatedAt = DateTimeOffset.UtcNow;
+    public void Activate()
+    {
+        IsActive = true;
+    }
 
-            Services = new List<Service>();
-            Barbers = new List<UserProfile>();
-            Branches = new List<Branch>();
-        }
-
-        public static BarberShop Create(
-            Guid ownerUserId,
-            string name,
-            string description,
-            byte[] logo,
-            byte[] banner)
-        {
-            ValidateDetails(name, description);
-            return new BarberShop(ownerUserId, name, description, logo, banner);
-        }
-
-        public void Update(
-            string name,
-            string description,
-            byte[] logo,
-            byte[] banner)
-        {
-            ValidateDetails(name, description);
-            Name = name.Trim();
-
-            Description = description.Trim();
-
-            Logo = logo;
-
-            Banner = banner;
-        }
-
-        private static void ValidateDetails(string name, string description)
-        {
-            if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("El nombre de la barbería es requerido.");
-
-            if (name.Trim().Length > 150)
-                throw new ArgumentException("El nombre de la barbería no puede superar 150 caracteres.");
-
-            if (string.IsNullOrWhiteSpace(description))
-                throw new ArgumentException("La descripción de la barbería es requerida.");
-
-            if (description.Trim().Length > 500)
-                throw new ArgumentException("La descripción de la barbería no puede superar 500 caracteres.");
-        }
-
-        public void Activate()
-        {
-            IsActive = true;
-        }
-
-        public void Deactivate()
-        {
-            IsActive = false;
-        }
+    public void Deactivate()
+    {
+        IsActive = false;
     }
 }

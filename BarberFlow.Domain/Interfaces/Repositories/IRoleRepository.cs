@@ -1,9 +1,7 @@
-﻿using BarberFlow.Domain.Entities;
+using BarberFlow.Domain.Entities;
 
-namespace BarberFlow.Domain.Interfaces.Repositories
+namespace BarberFlow.Domain.Interfaces.Repositories;
+public interface IRoleRepository
 {
-    public interface IRoleRepository
-    {
-        Task<Role?> GetByIdAsync(int roleId, CancellationToken cancellationToken);
-    }
+    Task<Role?> GetByIdAsync(int roleId, CancellationToken cancellationToken);
 }

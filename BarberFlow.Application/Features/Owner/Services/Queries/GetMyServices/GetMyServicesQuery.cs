@@ -1,8 +1,6 @@
-﻿using MediatR;
+using MediatR;
 
-namespace BarberFlow.Application.Features.Services.Queries.GetMyServices
+namespace BarberFlow.Application.Features.Services.Queries.GetMyServices;
+public class GetMyServicesQuery : IRequest<List<ServiceDto>>
 {
-    public class GetMyServicesQuery : IRequest<List<ServiceDto>>
-    {
-    }
 }

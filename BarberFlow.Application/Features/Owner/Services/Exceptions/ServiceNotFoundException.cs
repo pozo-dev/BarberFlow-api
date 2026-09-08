@@ -1,10 +1,8 @@
-﻿namespace BarberFlow.Application.Features.Services.Exceptions
+namespace BarberFlow.Application.Features.Services.Exceptions;
+public class ServiceNotFoundException : Exception
 {
-    public class ServiceNotFoundException : Exception
+    public ServiceNotFoundException()
+        : base("Service not found.")
     {
-        public ServiceNotFoundException()
-            : base("Service not found.")
-        {
-        }
     }
 }

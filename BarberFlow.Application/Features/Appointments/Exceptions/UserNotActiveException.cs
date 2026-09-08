@@ -1,7 +1,5 @@
-﻿namespace BarberFlow.Application.Features.Appointments.Exceptions
+namespace BarberFlow.Application.Features.Appointments.Exceptions;
+public class UserNotActiveException : Exception
 {
-    public class UserNotActiveException : Exception
-    {
-        public UserNotActiveException() : base("User is not active.") { }
-    }
+    public UserNotActiveException() : base("User is not active.") { }
 }

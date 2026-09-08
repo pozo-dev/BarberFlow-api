@@ -1,65 +1,63 @@
-﻿using BarberFlow.Application.Common.Interfaces;
+using BarberFlow.Application.Common.Interfaces;
 using BarberFlow.Application.Features.Auth.Exceptions;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 
-namespace BarberFlow.Infrastructure.Services
+namespace BarberFlow.Infrastructure.Services;
+public class CurrentUserService : ICurrentUserService
 {
-    public class CurrentUserService : ICurrentUserService
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    public CurrentUserService(IHttpContextAccessor httpContextAccessor)
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        _httpContextAccessor = httpContextAccessor;
+    }
 
-        public CurrentUserService(IHttpContextAccessor httpContextAccessor)
+    public Guid UserId
+    {
+        get
         {
-            _httpContextAccessor = httpContextAccessor;
+            var userId = _httpContextAccessor.HttpContext?
+                .User?
+                .FindFirst(ClaimTypes.NameIdentifier)?
+                .Value;
+
+            if (userId == null)
+                throw new UnauthorizedException();
+
+            return Guid.Parse(userId);
         }
+    }
 
-        public Guid UserId
+    public Guid ProfileId
+    {
+        get
         {
-            get
-            {
-                var userId = _httpContextAccessor.HttpContext?
-                    .User?
-                    .FindFirst(ClaimTypes.NameIdentifier)?
-                    .Value;
+            var profileId = _httpContextAccessor.HttpContext?
+                .User?
+                .FindFirst("profileId")?
+                .Value;
 
-                if (userId == null)
-                    throw new UnauthorizedException();
+            if (profileId == null)
+                throw new UnauthorizedException();
 
-                return Guid.Parse(userId);
-            }
+            return Guid.Parse(profileId);
         }
+    }
 
-        public Guid ProfileId
+    public int RoleId
+    {
+        get
         {
-            get
-            {
-                var profileId = _httpContextAccessor.HttpContext?
-                    .User?
-                    .FindFirst("profileId")?
-                    .Value;
+            var roleId = _httpContextAccessor.HttpContext?
+                .User?
+                .FindFirst("roleId")?
+                .Value;
 
-                if (profileId == null)
-                    throw new UnauthorizedException();
+            if (roleId == null)
+                throw new UnauthorizedException();
 
-                return Guid.Parse(profileId);
-            }
-        }
-
-        public int RoleId
-        {
-            get
-            {
-                var roleId = _httpContextAccessor.HttpContext?
-                    .User?
-                    .FindFirst("roleId")?
-                    .Value;
-
-                if (roleId == null)
-                    throw new UnauthorizedException();
-
-                return int.Parse(roleId);
-            }
+            return int.Parse(roleId);
         }
     }
 }

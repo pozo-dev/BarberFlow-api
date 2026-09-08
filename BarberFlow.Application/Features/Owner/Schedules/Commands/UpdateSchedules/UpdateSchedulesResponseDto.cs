@@ -1,7 +1,5 @@
-namespace BarberFlow.Application.Features.Schedules.Commands.UpdateSchedules
+namespace BarberFlow.Application.Features.Schedules.Commands.UpdateSchedules;
+public class UpdateSchedulesResponseDto
 {
-    public class UpdateSchedulesResponseDto
-    {
-        public Guid BranchId { get; set; }
-    }
+    public Guid BranchId { get; set; }
 }

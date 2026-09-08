@@ -1,10 +1,8 @@
-﻿namespace BarberFlow.Application.Features.Auth.Exceptions
+namespace BarberFlow.Application.Features.Auth.Exceptions;
+public class MissingDeviceIdException : Exception
 {
-    public class MissingDeviceIdException : Exception
+    public MissingDeviceIdException()
+        : base("DeviceId is required.")
     {
-        public MissingDeviceIdException()
-            : base("DeviceId is required.")
-        {
-        }
     }
 }

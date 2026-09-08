@@ -1,10 +1,8 @@
-﻿namespace BarberFlow.Application.Common.Exceptions
+namespace BarberFlow.Application.Common.Exceptions;
+public class CurrentProfileUnavailableException : Exception
 {
-    public class CurrentProfileUnavailableException : Exception
+    public CurrentProfileUnavailableException()
+        : base("No se pudo obtener el perfil activo del usuario autenticado.")
     {
-        public CurrentProfileUnavailableException()
-            : base("No se pudo obtener el perfil activo del usuario autenticado.")
-        {
-        }
     }
 }

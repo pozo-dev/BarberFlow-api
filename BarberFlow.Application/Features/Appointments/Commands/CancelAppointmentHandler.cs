@@ -4,44 +4,42 @@ using BarberFlow.Domain.Interfaces;
 using BarberFlow.Domain.Interfaces.Repositories;
 using MediatR;
 
-namespace BarberFlow.Application.Features.Appointments.Commands
+namespace BarberFlow.Application.Features.Appointments.Commands;
+public class CancelAppointmentHandler : IRequestHandler<CancelAppointmentCommand, bool>
 {
-    public class CancelAppointmentHandler : IRequestHandler<CancelAppointmentCommand, bool>
+    private readonly IAppointmentRepository _appointmentRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ICurrentUserService _currentUser;
+
+    public CancelAppointmentHandler(
+        IAppointmentRepository appointmentRepository,
+        IUnitOfWork unitOfWork,
+        ICurrentUserService currentUser)
     {
-        private readonly IAppointmentRepository _appointmentRepository;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly ICurrentUserService _currentUser;
+        _appointmentRepository = appointmentRepository;
+        _unitOfWork = unitOfWork;
+        _currentUser = currentUser;
+    }
 
-        public CancelAppointmentHandler(
-            IAppointmentRepository appointmentRepository,
-            IUnitOfWork unitOfWork,
-            ICurrentUserService currentUser)
-        {
-            _appointmentRepository = appointmentRepository;
-            _unitOfWork = unitOfWork;
-            _currentUser = currentUser;
-        }
+    public async Task<bool> Handle(CancelAppointmentCommand request, CancellationToken cancellationToken)
+    {
+        var userId = _currentUser.UserId;
 
-        public async Task<bool> Handle(CancelAppointmentCommand request, CancellationToken cancellationToken)
-        {
-            var userId = _currentUser.UserId;
+        var appointment = await _appointmentRepository.GetByIdAsync(request.AppointmentId, cancellationToken);
 
-            var appointment = await _appointmentRepository.GetByIdAsync(request.AppointmentId, cancellationToken);
+        if (appointment == null)
+            throw new AppointmentNotFoundException();
 
-            if (appointment == null)
-                throw new AppointmentNotFoundException();
+        if (appointment.UserId != userId)
+            throw new CannotCancelOthersAppointmentException();
 
-            if (appointment.UserId != userId)
-                throw new CannotCancelOthersAppointmentException();
+        if (!appointment.CanBeCancelled())
+            throw new AppointmentCannotBeCancelledException();
 
-            if (!appointment.CanBeCancelled())
-                throw new AppointmentCannotBeCancelledException();
+        appointment.Cancel();
 
-            appointment.Cancel();
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-            return true;
-        }
+        return true;
     }
 }

@@ -1,7 +1,5 @@
-﻿namespace BarberFlow.Application.Features.Branches.Commands.UpdateBranch
+namespace BarberFlow.Application.Features.Branches.Commands.UpdateBranch;
+public class UpdateBranchResponseDto
 {
-    public class UpdateBranchResponseDto
-    {
-        public Guid Id { get; set; }
-    }
+    public Guid Id { get; set; }
 }

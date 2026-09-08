@@ -1,11 +1,9 @@
-﻿using BarberFlow.Domain.Entities;
+using BarberFlow.Domain.Entities;
 
-namespace BarberFlow.Application.Common.Interfaces
+namespace BarberFlow.Application.Common.Interfaces;
+public interface IJwtService
 {
-    public interface IJwtService
-    {
-        string GenerateAccessToken(User user, UserProfile userProfile);
-        string GenerateRefreshToken();
-        DateTimeOffset GetAccessTokenExpiration();
-    }
+    string GenerateAccessToken(User user, UserProfile userProfile);
+    string GenerateRefreshToken();
+    DateTimeOffset GetAccessTokenExpiration();
 }

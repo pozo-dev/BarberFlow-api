@@ -8,72 +8,70 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
-namespace BarberFlow.Api.Controllers
+namespace BarberFlow.Api.Controllers;
+[ApiController]
+[Route("api/[controller]")]
+public class AuthController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class AuthController : ControllerBase
+    private readonly IMediator _mediator;
+
+    public AuthController(IMediator mediator)
     {
-        private readonly IMediator _mediator;
+        _mediator = mediator;
+    }
 
-        public AuthController(IMediator mediator)
+    [HttpPost("login-context")]
+    public async Task<ActionResult<LoginContextResponseDto>> GetLoginContext(GetLoginContextQuery query)
+    {
+        return Ok(await _mediator.Send(query));
+    }
+
+    [EnableRateLimiting("OtpPolicy")]
+    [HttpPost("request-otp")]
+    public async Task<IActionResult> RequestOtp([FromBody] RequestOtpCommand command, CancellationToken cancellationToken)
+    {
+        try
         {
-            _mediator = mediator;
+            var result = await _mediator.Send(command, cancellationToken);
+            return Ok(result);
         }
-
-        [HttpPost("login-context")]
-        public async Task<ActionResult<LoginContextResponseDto>> GetLoginContext(GetLoginContextQuery query)
+        catch (Exception)
         {
-            return Ok(await _mediator.Send(query));
+            // Mensaje genï¿½rico para evitar filtrado de informaciï¿½n
+            return BadRequest(new { message = "No se pudo generar el cï¿½digo OTP." });
         }
+    }
 
-        [EnableRateLimiting("OtpPolicy")]
-        [HttpPost("request-otp")]
-        public async Task<IActionResult> RequestOtp([FromBody] RequestOtpCommand command, CancellationToken cancellationToken)
+    [EnableRateLimiting("OtpPolicy")]
+    [HttpPost("verify-otp")]
+    public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpCommand command, CancellationToken cancellationToken)
+    {
+        try
         {
-            try
-            {
-                var result = await _mediator.Send(command, cancellationToken);
-                return Ok(result);
-            }
-            catch (Exception)
-            {
-                // Mensaje genérico para evitar filtrado de información
-                return BadRequest(new { message = "No se pudo generar el código OTP." });
-            }
+            var result = await _mediator.Send(command, cancellationToken);
+            return Ok(result);
         }
-
-        [EnableRateLimiting("OtpPolicy")]
-        [HttpPost("verify-otp")]
-        public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpCommand command, CancellationToken cancellationToken)
+        catch (Exception ex)
         {
-            try
-            {
-                var result = await _mediator.Send(command, cancellationToken);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                // Devuelve siempre un mensaje genérico para evitar enumeración de usuarios
-                return Unauthorized(new { message = "Credenciales inválidas." });
-            }
+            // Devuelve siempre un mensaje genï¿½rico para evitar enumeraciï¿½n de usuarios
+            return Unauthorized(new { message = "Credenciales invï¿½lidas." });
         }
+    }
 
-        [HttpPost("refresh-token")]
-        public async Task<ActionResult<AuthResponseDto>> RefreshToken(RefreshTokenCommand command)
-        {
-            var response = await _mediator.Send(command);
+    [HttpPost("refresh-token")]
+    public async Task<ActionResult<AuthResponseDto>> RefreshToken(RefreshTokenCommand command)
+    {
+        var response = await _mediator.Send(command);
 
-            return Ok(response);
-        }
+        return Ok(response);
+    }
 
-        [HttpPost("logout")]
-        public async Task<IActionResult> Logout(LogoutCommand command)
-        {
-            await _mediator.Send(command);
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout(LogoutCommand command)
+    {
+        await _mediator.Send(command);
 
-            return NoContent();
-        }
+        return NoContent();
     }
 }
 

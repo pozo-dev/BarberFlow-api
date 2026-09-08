@@ -1,10 +1,8 @@
-﻿namespace BarberFlow.Application.Features.Appointments.Exceptions
+namespace BarberFlow.Application.Features.Appointments.Exceptions;
+public class AppointmentConflictException : Exception
 {
-    public class AppointmentConflictException : Exception
+    public AppointmentConflictException()
+        : base("The selected time slot is already booked.")
     {
-        public AppointmentConflictException()
-            : base("The selected time slot is already booked.")
-        {
-        }
     }
 }

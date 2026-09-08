@@ -1,10 +1,8 @@
-﻿namespace BarberFlow.Infrastructure.Persistence.Seed
+namespace BarberFlow.Infrastructure.Persistence.Seed;
+public static class DatabaseSeeder
 {
-    public static class DatabaseSeeder
+    public static async Task SeedAsync(BarberFlowDbContext context)
     {
-        public static async Task SeedAsync(BarberFlowDbContext context)
-        {
-            await RoleSeeder.SeedAsync(context);
-        }
+        await RoleSeeder.SeedAsync(context);
     }
 }

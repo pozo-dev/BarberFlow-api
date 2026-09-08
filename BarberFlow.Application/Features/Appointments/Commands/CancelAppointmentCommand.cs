@@ -1,9 +1,7 @@
 using MediatR;
 
-namespace BarberFlow.Application.Features.Appointments.Commands
+namespace BarberFlow.Application.Features.Appointments.Commands;
+public class CancelAppointmentCommand : IRequest<bool>
 {
-    public class CancelAppointmentCommand : IRequest<bool>
-    {
-        public Guid AppointmentId { get; set; }
-    }
+    public Guid AppointmentId { get; set; }
 }

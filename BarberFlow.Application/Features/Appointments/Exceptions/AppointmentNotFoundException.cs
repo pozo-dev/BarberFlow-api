@@ -1,7 +1,5 @@
-﻿namespace BarberFlow.Application.Features.Appointments.Exceptions
+namespace BarberFlow.Application.Features.Appointments.Exceptions;
+public class AppointmentNotFoundException : Exception
 {
-    public class AppointmentNotFoundException : Exception
-    {
-        public AppointmentNotFoundException() : base("Appointment not found") { }
-    }
+    public AppointmentNotFoundException() : base("Appointment not found") { }
 }

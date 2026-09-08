@@ -1,8 +1,6 @@
-namespace BarberFlow.Application.Common.Interfaces
+namespace BarberFlow.Application.Common.Interfaces;
+public interface ITokenEncryptionService
 {
-    public interface ITokenEncryptionService
-    {
-        string Encrypt(string plainText);
-        string Decrypt(string cipherText);
-    }
+    string Encrypt(string plainText);
+    string Decrypt(string cipherText);
 }

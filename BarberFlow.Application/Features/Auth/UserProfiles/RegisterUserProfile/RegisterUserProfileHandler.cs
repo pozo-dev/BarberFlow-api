@@ -1,4 +1,4 @@
-﻿using BarberFlow.Application.Common.Exceptions;
+using BarberFlow.Application.Common.Exceptions;
 using BarberFlow.Application.Features.Appointments.Exceptions;
 using BarberFlow.Application.Features.Roles.Exceptions;
 using BarberFlow.Domain.Constants;
@@ -7,108 +7,106 @@ using BarberFlow.Domain.Interfaces;
 using BarberFlow.Domain.Interfaces.Repositories;
 using MediatR;
 
-namespace BarberFlow.Application.Features.UserProfiles.RegisterUserProfile
+namespace BarberFlow.Application.Features.UserProfiles.RegisterUserProfile;
+public class RegisterUserProfileHandler
+: IRequestHandler<RegisterUserProfileCommand, RegisterUserProfileResponseDto>
 {
-    public class RegisterUserProfileHandler
-    : IRequestHandler<RegisterUserProfileCommand, RegisterUserProfileResponseDto>
+    private readonly IUserRepository _userRepository;
+    private readonly IUserProfileRepository _userProfileRepository;
+    private readonly IRoleRepository _roleRepository;
+    private readonly ICollaboratorRepository _collaboratorRepository;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public RegisterUserProfileHandler(
+        IUserRepository userRepository,
+        IUserProfileRepository userProfileRepository,
+        IRoleRepository roleRepository,
+        ICollaboratorRepository collaboratorRepository,
+        IUnitOfWork unitOfWork)
     {
-        private readonly IUserRepository _userRepository;
-        private readonly IUserProfileRepository _userProfileRepository;
-        private readonly IRoleRepository _roleRepository;
-        private readonly ICollaboratorRepository _collaboratorRepository;
-        private readonly IUnitOfWork _unitOfWork;
+        _userRepository = userRepository;
+        _userProfileRepository = userProfileRepository;
+        _roleRepository = roleRepository;
+        _collaboratorRepository = collaboratorRepository;
+        _unitOfWork = unitOfWork;
+    }
 
-        public RegisterUserProfileHandler(
-            IUserRepository userRepository,
-            IUserProfileRepository userProfileRepository,
-            IRoleRepository roleRepository,
-            ICollaboratorRepository collaboratorRepository,
-            IUnitOfWork unitOfWork)
+    public async Task<RegisterUserProfileResponseDto> Handle(
+        RegisterUserProfileCommand request,
+        CancellationToken cancellationToken)
+    {
+        var user = await ValidateRequest(
+            request,
+            cancellationToken);
+
+        var profile = new UserProfile(
+            user.Id,
+            request.RoleId,
+            request.BarberShopId);
+
+        _userProfileRepository.Add(profile);
+
+        if (request.RoleId == RoleIds.Barber)
         {
-            _userRepository = userRepository;
-            _userProfileRepository = userProfileRepository;
-            _roleRepository = roleRepository;
-            _collaboratorRepository = collaboratorRepository;
-            _unitOfWork = unitOfWork;
+            var collaborators = await _collaboratorRepository.GetActiveByPhoneNumberAsync(user.PhoneNumber, cancellationToken);
+            if (collaborators.Count == 0)
+                throw new ValidationException("Solo un colaborador activo puede crear un perfil de Barbero.");
+
+            foreach (var collaborator in collaborators)
+                collaborator.LinkUserProfile(profile.Id);
         }
 
-        public async Task<RegisterUserProfileResponseDto> Handle(
-            RegisterUserProfileCommand request,
-            CancellationToken cancellationToken)
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return new RegisterUserProfileResponseDto
         {
-            var user = await ValidateRequest(
-                request,
-                cancellationToken);
+            UserProfileId = profile.Id
+        };
+    }
 
-            var profile = new UserProfile(
-                user.Id,
-                request.RoleId,
-                request.BarberShopId);
+    private async Task<User> ValidateRequest(
+        RegisterUserProfileCommand request,
+        CancellationToken cancellationToken)
+    {
+        if (request.UserId == Guid.Empty)
+            throw new ValidationException("UserId is required.");
 
-            _userProfileRepository.Add(profile);
+        if (request.BarberShopId.HasValue)
+            throw new ValidationException("A barber shop cannot be assigned when registering a profile.");
 
-            if (request.RoleId == RoleIds.Barber)
-            {
-                var collaborators = await _collaboratorRepository.GetActiveByPhoneNumberAsync(user.PhoneNumber, cancellationToken);
-                if (collaborators.Count == 0)
-                    throw new ValidationException("Solo un colaborador activo puede crear un perfil de Barbero.");
-
-                foreach (var collaborator in collaborators)
-                    collaborator.LinkUserProfile(profile.Id);
-            }
-
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-            return new RegisterUserProfileResponseDto
-            {
-                UserProfileId = profile.Id
-            };
+        if (request.RoleId != RoleIds.Client &&
+            request.RoleId != RoleIds.Barber &&
+            request.RoleId != RoleIds.Owner)
+        {
+            throw new ValidationException(
+                "The selected role cannot be self-registered.");
         }
 
-        private async Task<User> ValidateRequest(
-            RegisterUserProfileCommand request,
-            CancellationToken cancellationToken)
-        {
-            if (request.UserId == Guid.Empty)
-                throw new ValidationException("UserId is required.");
+        var user = await _userRepository.GetByIdAsync(
+            request.UserId,
+            cancellationToken);
 
-            if (request.BarberShopId.HasValue)
-                throw new ValidationException("A barber shop cannot be assigned when registering a profile.");
+        if (user == null)
+            throw new UserNotFoundException();
 
-            if (request.RoleId != RoleIds.Client &&
-                request.RoleId != RoleIds.Barber &&
-                request.RoleId != RoleIds.Owner)
-            {
-                throw new ValidationException(
-                    "The selected role cannot be self-registered.");
-            }
+        if (!user.IsActive)
+            throw new UserNotActiveException();
 
-            var user = await _userRepository.GetByIdAsync(
-                request.UserId,
-                cancellationToken);
+        var role = await _roleRepository.GetByIdAsync(
+            request.RoleId,
+            cancellationToken);
 
-            if (user == null)
-                throw new UserNotFoundException();
+        if (role == null)
+            throw new RoleNotFoundException();
 
-            if (!user.IsActive)
-                throw new UserNotActiveException();
+        var exists = await _userProfileRepository.ExistsAsync(
+            request.UserId,
+            request.RoleId,
+            cancellationToken);
 
-            var role = await _roleRepository.GetByIdAsync(
-                request.RoleId,
-                cancellationToken);
+        if (exists)
+            throw new UserProfileAlreadyExistsException();
 
-            if (role == null)
-                throw new RoleNotFoundException();
-
-            var exists = await _userProfileRepository.ExistsAsync(
-                request.UserId,
-                request.RoleId,
-                cancellationToken);
-
-            if (exists)
-                throw new UserProfileAlreadyExistsException();
-
-            return user;
-        }
+        return user;
     }
 }

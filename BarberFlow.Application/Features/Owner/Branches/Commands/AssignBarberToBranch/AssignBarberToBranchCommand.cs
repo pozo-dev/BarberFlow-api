@@ -1,13 +1,11 @@
-﻿using MediatR;
+using MediatR;
 
-namespace BarberFlow.Application.Features.Branches.Commands.AssignBarberToBranch
+namespace BarberFlow.Application.Features.Branches.Commands.AssignBarberToBranch;
+public class AssignBarberToBranchCommand : IRequest
 {
-    public class AssignBarberToBranchCommand : IRequest
-    {
-        public Guid BranchId { get; set; }
+    public Guid BranchId { get; set; }
 
-        public Guid BarberProfileId { get; set; }
+    public Guid BarberProfileId { get; set; }
 
-        public bool IsPrimary { get; set; }
-    }
+    public bool IsPrimary { get; set; }
 }

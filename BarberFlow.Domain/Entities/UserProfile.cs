@@ -1,60 +1,58 @@
-﻿using BarberFlow.Domain.Constants;
+using BarberFlow.Domain.Constants;
 using System.ComponentModel.DataAnnotations;
 
-namespace BarberFlow.Domain.Entities
+namespace BarberFlow.Domain.Entities;
+public class UserProfile
 {
-    public class UserProfile
+    public Guid Id { get; private set; }
+    public Guid UserId { get; private set; }
+    public int RoleId { get; private set; }
+    public Guid? BarberShopId { get; private set; }
+    public bool IsActive { get; private set; }
+    public DateTimeOffset CreatedAt { get; private set; }
+
+    public User User { get; private set; }
+    public Role Role { get; private set; }
+    public BarberShop? BarberShop { get; private set; }
+    public ICollection<RefreshToken> RefreshTokens { get; private set; }
+    public ICollection<BarberAssignment> BarberAssignments { get; private set; }
+    public ICollection<Collaborator> Collaborators { get; private set; }
+
+    private UserProfile()
     {
-        public Guid Id { get; private set; }
-        public Guid UserId { get; private set; }
-        public int RoleId { get; private set; }
-        public Guid? BarberShopId { get; private set; }
-        public bool IsActive { get; private set; }
-        public DateTimeOffset CreatedAt { get; private set; }
+        RefreshTokens = new List<RefreshToken>();
+        BarberAssignments = new List<BarberAssignment>();
+        Collaborators = new List<Collaborator>();
+    }
 
-        public User User { get; private set; }
-        public Role Role { get; private set; }
-        public BarberShop? BarberShop { get; private set; }
-        public ICollection<RefreshToken> RefreshTokens { get; private set; }
-        public ICollection<BarberAssignment> BarberAssignments { get; private set; }
-        public ICollection<Collaborator> Collaborators { get; private set; }
+    public UserProfile(Guid userId, int roleId, Guid? barberShopId = null)
+    {
+        Id = Guid.NewGuid();
+        UserId = userId;
+        RoleId = roleId;
+        BarberShopId = barberShopId;
+        IsActive = true;
+        CreatedAt = DateTimeOffset.UtcNow;
+        RefreshTokens = new List<RefreshToken>();
+        BarberAssignments = new List<BarberAssignment>();
+        Collaborators = new List<Collaborator>();
+    }
 
-        private UserProfile()
-        {
-            RefreshTokens = new List<RefreshToken>();
-            BarberAssignments = new List<BarberAssignment>();
-            Collaborators = new List<Collaborator>();
-        }
+    public void AssignBarberShop(Guid barberShopId)
+    {
+        if (RoleId != RoleIds.Owner)
+            throw new ValidationException(
+                "Solo un perfil de propietario puede tener una barbería.");
 
-        public UserProfile(Guid userId, int roleId, Guid? barberShopId = null)
-        {
-            Id = Guid.NewGuid();
-            UserId = userId;
-            RoleId = roleId;
-            BarberShopId = barberShopId;
-            IsActive = true;
-            CreatedAt = DateTimeOffset.UtcNow;
-            RefreshTokens = new List<RefreshToken>();
-            BarberAssignments = new List<BarberAssignment>();
-            Collaborators = new List<Collaborator>();
-        }
+        if (barberShopId == Guid.Empty)
+            throw new ValidationException(
+                "La barbería es requerida.");
 
-        public void AssignBarberShop(Guid barberShopId)
-        {
-            if (RoleId != RoleIds.Owner)
-                throw new ValidationException(
-                    "Solo un perfil de propietario puede tener una barbería.");
+        BarberShopId = barberShopId;
+    }
 
-            if (barberShopId == Guid.Empty)
-                throw new ValidationException(
-                    "La barbería es requerida.");
-
-            BarberShopId = barberShopId;
-        }
-
-        public void Deactivate()
-        {
-            IsActive = false;
-        }
+    public void Deactivate()
+    {
+        IsActive = false;
     }
 }

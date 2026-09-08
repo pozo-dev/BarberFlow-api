@@ -3,10 +3,8 @@ using MediatR;
 using System;
 using System.Collections.Generic;
 
-namespace BarberFlow.Application.Features.Appointments.Queries
+namespace BarberFlow.Application.Features.Appointments.Queries;
+public class GetBarberShopAppointmentsQuery : IRequest<List<AppointmentDto>>
 {
-    public class GetBarberShopAppointmentsQuery : IRequest<List<AppointmentDto>>
-    {
-        public Guid BarberShopId { get; set; }
-    }
+    public Guid BarberShopId { get; set; }
 }

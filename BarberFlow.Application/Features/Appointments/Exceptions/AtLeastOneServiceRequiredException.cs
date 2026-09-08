@@ -1,10 +1,8 @@
-﻿namespace BarberFlow.Application.Features.Appointments.Exceptions
+namespace BarberFlow.Application.Features.Appointments.Exceptions;
+public class AtLeastOneServiceRequiredException : Exception
 {
-    public class AtLeastOneServiceRequiredException : Exception
+    public AtLeastOneServiceRequiredException()
+        : base("At least one service is required.")
     {
-        public AtLeastOneServiceRequiredException()
-            : base("At least one service is required.")
-        {
-        }
     }
 }

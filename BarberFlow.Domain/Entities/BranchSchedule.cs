@@ -1,87 +1,85 @@
-﻿namespace BarberFlow.Domain.Entities
+namespace BarberFlow.Domain.Entities;
+public class BranchSchedule
 {
-    public class BranchSchedule
+    public Guid Id { get; private set; }
+
+    public Guid BranchId { get; private set; }
+
+    public BarberFlow.Domain.Enums.ScheduleDay DayOfWeek { get; private set; }
+
+    public TimeOnly OpenTime { get; private set; }
+
+    public TimeOnly CloseTime { get; private set; }
+
+    public bool IsClosed { get; private set; }
+
+    public Branch Branch { get; private set; } = null!;
+
+    private BranchSchedule()
     {
-        public Guid Id { get; private set; }
+    }
 
-        public Guid BranchId { get; private set; }
+    private BranchSchedule(
+        Guid branchId,
+        BarberFlow.Domain.Enums.ScheduleDay dayOfWeek,
+        TimeOnly openTime,
+        TimeOnly closeTime,
+        bool isClosed)
+    {
+        Id = Guid.NewGuid();
 
-        public BarberFlow.Domain.Enums.ScheduleDay DayOfWeek { get; private set; }
+        BranchId = branchId;
 
-        public TimeOnly OpenTime { get; private set; }
+        DayOfWeek = dayOfWeek;
 
-        public TimeOnly CloseTime { get; private set; }
+        OpenTime = openTime;
 
-        public bool IsClosed { get; private set; }
+        CloseTime = closeTime;
 
-        public Branch Branch { get; private set; } = null!;
+        IsClosed = isClosed;
+    }
 
-        private BranchSchedule()
-        {
-        }
+    public static BranchSchedule Create(
+        Guid branchId,
+        BarberFlow.Domain.Enums.ScheduleDay dayOfWeek,
+        TimeOnly openTime,
+        TimeOnly closeTime,
+        bool isClosed = false)
+    {
+        if (branchId == Guid.Empty)
+            throw new ArgumentException("La sucursal es requerida.");
 
-        private BranchSchedule(
-            Guid branchId,
-            BarberFlow.Domain.Enums.ScheduleDay dayOfWeek,
-            TimeOnly openTime,
-            TimeOnly closeTime,
-            bool isClosed)
-        {
-            Id = Guid.NewGuid();
+        ValidateTimes(openTime, closeTime, isClosed);
 
-            BranchId = branchId;
+        return new BranchSchedule(
+            branchId,
+            dayOfWeek,
+            openTime,
+            closeTime,
+            isClosed);
+    }
 
-            DayOfWeek = dayOfWeek;
+    public void Update(
+        TimeOnly openTime,
+        TimeOnly closeTime,
+        bool isClosed)
+    {
+        ValidateTimes(openTime, closeTime, isClosed);
 
-            OpenTime = openTime;
+        OpenTime = openTime;
 
-            CloseTime = closeTime;
+        CloseTime = closeTime;
 
-            IsClosed = isClosed;
-        }
+        IsClosed = isClosed;
+    }
 
-        public static BranchSchedule Create(
-            Guid branchId,
-            BarberFlow.Domain.Enums.ScheduleDay dayOfWeek,
-            TimeOnly openTime,
-            TimeOnly closeTime,
-            bool isClosed = false)
-        {
-            if (branchId == Guid.Empty)
-                throw new ArgumentException("La sucursal es requerida.");
-
-            ValidateTimes(openTime, closeTime, isClosed);
-
-            return new BranchSchedule(
-                branchId,
-                dayOfWeek,
-                openTime,
-                closeTime,
-                isClosed);
-        }
-
-        public void Update(
-            TimeOnly openTime,
-            TimeOnly closeTime,
-            bool isClosed)
-        {
-            ValidateTimes(openTime, closeTime, isClosed);
-
-            OpenTime = openTime;
-
-            CloseTime = closeTime;
-
-            IsClosed = isClosed;
-        }
-
-        private static void ValidateTimes(
-            TimeOnly openTime,
-            TimeOnly closeTime,
-            bool isClosed)
-        {
-            if (!isClosed && openTime >= closeTime)
-                throw new ArgumentException(
-                    "La hora de apertura debe ser menor que la hora de cierre.");
-        }
+    private static void ValidateTimes(
+        TimeOnly openTime,
+        TimeOnly closeTime,
+        bool isClosed)
+    {
+        if (!isClosed && openTime >= closeTime)
+            throw new ArgumentException(
+                "La hora de apertura debe ser menor que la hora de cierre.");
     }
 }

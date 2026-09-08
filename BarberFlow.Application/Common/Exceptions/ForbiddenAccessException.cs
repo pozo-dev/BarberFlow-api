@@ -1,10 +1,8 @@
-﻿namespace BarberFlow.Application.Common.Exceptions
+namespace BarberFlow.Application.Common.Exceptions;
+public class ForbiddenAccessException : Exception
 {
-    public class ForbiddenAccessException : Exception
+    public ForbiddenAccessException()
+        : base("No tiene permisos para realizar esta acción.")
     {
-        public ForbiddenAccessException()
-            : base("No tiene permisos para realizar esta acción.")
-        {
-        }
     }
 }

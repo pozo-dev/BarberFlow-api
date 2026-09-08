@@ -1,158 +1,156 @@
-﻿using BarberFlow.Domain.Entities;
+using BarberFlow.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace BarberFlow.Infrastructure.Persistence.Repositories
+namespace BarberFlow.Infrastructure.Persistence.Repositories;
+public class BarberShopRepository : IBarberShopRepository
 {
-    public class BarberShopRepository : IBarberShopRepository
+    private readonly BarberFlowDbContext _context;
+
+    public BarberShopRepository(BarberFlowDbContext context)
     {
-        private readonly BarberFlowDbContext _context;
+        _context = context;
+    }
 
-        public BarberShopRepository(BarberFlowDbContext context)
-        {
-            _context = context;
-        }
+    public Task<BarberShop?> GetByIdAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        return _context.BarberShops
+            .AsNoTracking()
+            .FirstOrDefaultAsync(
+                b => b.Id == id,
+                cancellationToken);
+    }
 
-        public Task<BarberShop?> GetByIdAsync(
-            Guid id,
-            CancellationToken cancellationToken)
-        {
-            return _context.BarberShops
-                .AsNoTracking()
-                .FirstOrDefaultAsync(
-                    b => b.Id == id,
-                    cancellationToken);
-        }
+    public async Task<BarberShop?> GetByOwnerUserIdAsync(
+        Guid ownerUserId,
+        CancellationToken cancellationToken)
+    {
+        return await _context.BarberShops
+            .Include(x => x.Branches)
+                .ThenInclude(x => x.LocationSearch)
+            .Include(x => x.Branches)
+                .ThenInclude(x => x.Schedules)
+            .FirstOrDefaultAsync(
+                x => x.OwnerUserId == ownerUserId,
+                cancellationToken);
+    }
 
-        public async Task<BarberShop?> GetByOwnerUserIdAsync(
-            Guid ownerUserId,
-            CancellationToken cancellationToken)
-        {
-            return await _context.BarberShops
-                .Include(x => x.Branches)
-                    .ThenInclude(x => x.LocationSearch)
-                .Include(x => x.Branches)
-                    .ThenInclude(x => x.Schedules)
-                .FirstOrDefaultAsync(
-                    x => x.OwnerUserId == ownerUserId,
-                    cancellationToken);
-        }
+    public async Task<IReadOnlyList<BarberShop>> SearchActiveAsync(
+        string? search,
+        string? city,
+        int skip,
+        int take,
+        CancellationToken cancellationToken)
+    {
+        return await BuildActiveSearchQuery(search, city)
+            .Include(shop => shop.Branches.Where(branch =>
+                branch.IsActive &&
+                branch.Schedules.Any(schedule => !schedule.IsClosed) &&
+                _context.Collaborators.Any(collaborator =>
+                    collaborator.BranchId == branch.Id && collaborator.IsActive)))
+                .ThenInclude(branch => branch.LocationSearch)
+            .OrderBy(shop => shop.Name)
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync(cancellationToken);
+    }
 
-        public async Task<IReadOnlyList<BarberShop>> SearchActiveAsync(
-            string? search,
-            string? city,
-            int skip,
-            int take,
-            CancellationToken cancellationToken)
-        {
-            return await BuildActiveSearchQuery(search, city)
-                .Include(shop => shop.Branches.Where(branch =>
+    public Task<int> CountActiveAsync(
+        string? search,
+        string? city,
+        CancellationToken cancellationToken)
+    {
+        return BuildActiveSearchQuery(search, city).CountAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<string>> GetActiveCitiesAsync(
+        CancellationToken cancellationToken)
+    {
+        return await _context.Branches
+            .AsNoTracking()
+            .Where(branch =>
+                branch.IsActive &&
+                branch.BarberShop.IsActive &&
+                branch.BarberShop.Services.Any(service => service.IsActive) &&
+                _context.Collaborators.Any(collaborator =>
+                    collaborator.BranchId == branch.Id && collaborator.IsActive))
+            .Select(branch => branch.LocationSearch.DisplayName)
+            .Distinct()
+            .OrderBy(city => city)
+            .ToListAsync(cancellationToken);
+    }
+
+    private IQueryable<BarberShop> BuildActiveSearchQuery(string? search, string? city)
+    {
+        var query = _context.BarberShops
+            .AsNoTracking()
+            .Where(shop =>
+                shop.IsActive &&
+                shop.Services.Any(service => service.IsActive) &&
+                shop.Branches.Any(branch =>
                     branch.IsActive &&
                     branch.Schedules.Any(schedule => !schedule.IsClosed) &&
                     _context.Collaborators.Any(collaborator =>
-                        collaborator.BranchId == branch.Id && collaborator.IsActive)))
-                    .ThenInclude(branch => branch.LocationSearch)
-                .OrderBy(shop => shop.Name)
-                .Skip(skip)
-                .Take(take)
-                .ToListAsync(cancellationToken);
+                        collaborator.BranchId == branch.Id && collaborator.IsActive)));
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var value = search.Trim();
+            query = query.Where(shop =>
+                shop.Name.Contains(value) ||
+                shop.Description.Contains(value) ||
+                shop.Branches.Any(branch => branch.LocationSearch.DisplayName.Contains(value)));
         }
 
-        public Task<int> CountActiveAsync(
-            string? search,
-            string? city,
-            CancellationToken cancellationToken)
+        if (!string.IsNullOrWhiteSpace(city))
         {
-            return BuildActiveSearchQuery(search, city).CountAsync(cancellationToken);
+            var value = city.Trim();
+            query = query.Where(shop =>
+                shop.Branches.Any(branch => branch.IsActive && branch.LocationSearch.DisplayName.Contains(value)));
         }
 
-        public async Task<IReadOnlyList<string>> GetActiveCitiesAsync(
-            CancellationToken cancellationToken)
-        {
-            return await _context.Branches
-                .AsNoTracking()
-                .Where(branch =>
+        return query;
+    }
+
+    public Task<BarberShop?> GetActiveWithDetailsAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        return _context.BarberShops
+            .AsNoTracking()
+            .Where(shop =>
+                shop.Id == id &&
+                shop.IsActive &&
+                shop.Services.Any(service => service.IsActive) &&
+                shop.Branches.Any(branch =>
                     branch.IsActive &&
-                    branch.BarberShop.IsActive &&
-                    branch.BarberShop.Services.Any(service => service.IsActive) &&
-                    _context.Collaborators.Any(collaborator =>
-                        collaborator.BranchId == branch.Id && collaborator.IsActive))
-                .Select(branch => branch.LocationSearch.DisplayName)
-                .Distinct()
-                .OrderBy(city => city)
-                .ToListAsync(cancellationToken);
-        }
-
-        private IQueryable<BarberShop> BuildActiveSearchQuery(string? search, string? city)
-        {
-            var query = _context.BarberShops
-                .AsNoTracking()
-                .Where(shop =>
-                    shop.IsActive &&
-                    shop.Services.Any(service => service.IsActive) &&
-                    shop.Branches.Any(branch =>
-                        branch.IsActive &&
-                        branch.Schedules.Any(schedule => !schedule.IsClosed) &&
-                        _context.Collaborators.Any(collaborator =>
-                            collaborator.BranchId == branch.Id && collaborator.IsActive)));
-
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-                var value = search.Trim();
-                query = query.Where(shop =>
-                    shop.Name.Contains(value) ||
-                    shop.Description.Contains(value) ||
-                    shop.Branches.Any(branch => branch.LocationSearch.DisplayName.Contains(value)));
-            }
-
-            if (!string.IsNullOrWhiteSpace(city))
-            {
-                var value = city.Trim();
-                query = query.Where(shop =>
-                    shop.Branches.Any(branch => branch.IsActive && branch.LocationSearch.DisplayName.Contains(value)));
-            }
-
-            return query;
-        }
-
-        public Task<BarberShop?> GetActiveWithDetailsAsync(
-            Guid id,
-            CancellationToken cancellationToken)
-        {
-            return _context.BarberShops
-                .AsNoTracking()
-                .Where(shop =>
-                    shop.Id == id &&
-                    shop.IsActive &&
-                    shop.Services.Any(service => service.IsActive) &&
-                    shop.Branches.Any(branch =>
-                        branch.IsActive &&
-                        _context.Collaborators.Any(collaborator =>
-                            collaborator.BranchId == branch.Id && collaborator.IsActive)))
-                .Include(shop => shop.Branches.Where(branch =>
-                    branch.IsActive &&
-                    branch.Schedules.Any(schedule => !schedule.IsClosed) &&
                     _context.Collaborators.Any(collaborator =>
                         collaborator.BranchId == branch.Id && collaborator.IsActive)))
-                    .ThenInclude(branch => branch.Schedules)
-                .Include(shop => shop.Branches.Where(branch =>
-                    branch.IsActive &&
-                    branch.Schedules.Any(schedule => !schedule.IsClosed) &&
-                    _context.Collaborators.Any(collaborator =>
-                        collaborator.BranchId == branch.Id && collaborator.IsActive)))
-                    .ThenInclude(branch => branch.LocationSearch)
-                .FirstOrDefaultAsync(cancellationToken);
-        }
+            .Include(shop => shop.Branches.Where(branch =>
+                branch.IsActive &&
+                branch.Schedules.Any(schedule => !schedule.IsClosed) &&
+                _context.Collaborators.Any(collaborator =>
+                    collaborator.BranchId == branch.Id && collaborator.IsActive)))
+                .ThenInclude(branch => branch.Schedules)
+            .Include(shop => shop.Branches.Where(branch =>
+                branch.IsActive &&
+                branch.Schedules.Any(schedule => !schedule.IsClosed) &&
+                _context.Collaborators.Any(collaborator =>
+                    collaborator.BranchId == branch.Id && collaborator.IsActive)))
+                .ThenInclude(branch => branch.LocationSearch)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
 
-        public void Add(
-            BarberShop barberShop)
-        {
-            _context.BarberShops.Add(barberShop);
-        }
+    public void Add(
+        BarberShop barberShop)
+    {
+        _context.BarberShops.Add(barberShop);
+    }
 
-        public void Update(
-            BarberShop barberShop)
-        {
-            _context.BarberShops.Update(barberShop);
-        }
+    public void Update(
+        BarberShop barberShop)
+    {
+        _context.BarberShops.Update(barberShop);
     }
 }

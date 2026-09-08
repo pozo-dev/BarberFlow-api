@@ -1,10 +1,8 @@
-﻿namespace BarberFlow.Application.Features.Roles.Exceptions
+namespace BarberFlow.Application.Features.Roles.Exceptions;
+public class UserProfileAlreadyExistsException : Exception
 {
-    public class UserProfileAlreadyExistsException : Exception
+    public UserProfileAlreadyExistsException()
+         : base("The user already has this profile.")
     {
-        public UserProfileAlreadyExistsException()
-             : base("The user already has this profile.")
-        {
-        }
     }
 }

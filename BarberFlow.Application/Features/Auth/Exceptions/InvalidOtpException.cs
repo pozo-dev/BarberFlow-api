@@ -1,7 +1,5 @@
-﻿namespace BarberFlow.Application.Features.Auth.Exceptions
+namespace BarberFlow.Application.Features.Auth.Exceptions;
+public class InvalidOtpException : Exception
 {
-    public class InvalidOtpException : Exception
-    {
-        public InvalidOtpException() : base("Invalid OTP.") { }
-    }
+    public InvalidOtpException() : base("Invalid OTP.") { }
 }

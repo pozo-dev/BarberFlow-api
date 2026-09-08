@@ -1,10 +1,8 @@
-﻿namespace BarberFlow.Application.Common.Exceptions
+namespace BarberFlow.Application.Common.Exceptions;
+public class BarberShopAssociationException : Exception
 {
-    public class BarberShopAssociationException : Exception
+    public BarberShopAssociationException()
+        : base("El usuario no tiene una barbería asociada.")
     {
-        public BarberShopAssociationException()
-            : base("El usuario no tiene una barbería asociada.")
-        {
-        }
     }
 }

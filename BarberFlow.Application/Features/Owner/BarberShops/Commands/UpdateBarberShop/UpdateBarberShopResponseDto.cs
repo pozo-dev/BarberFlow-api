@@ -1,7 +1,5 @@
-﻿namespace BarberFlow.Application.Features.BarberShops.Commands.UpdateBarberShop
+namespace BarberFlow.Application.Features.BarberShops.Commands.UpdateBarberShop;
+public class UpdateBarberShopResponseDto
 {
-    public class UpdateBarberShopResponseDto
-    {
-        public Guid BarberShopId { get; set; }
-    }
+    public Guid BarberShopId { get; set; }
 }
