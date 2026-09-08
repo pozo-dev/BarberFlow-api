@@ -1,5 +1,8 @@
 using BarberFlow.Application.Common.Interfaces;
 using BarberFlow.Domain.Interfaces;
+using BarberFlow.Domain.Entities;
+using BarberFlow.Domain.Enums;
+using BarberFlow.Domain.Interfaces.Repositories;
 using MediatR;
 
 namespace BarberFlow.Application.Features.Client.Appointments.Commands.CancelClientAppointment;
@@ -7,12 +10,14 @@ namespace BarberFlow.Application.Features.Client.Appointments.Commands.CancelCli
 public sealed class CancelClientAppointmentHandler : IRequestHandler<CancelClientAppointmentCommand>
 {
     private readonly IClientAppointmentRepository _appointments;
+    private readonly IAppointmentActivityRepository _appointmentActivities;
     private readonly ICurrentUserService _currentUser;
     private readonly IUnitOfWork _unitOfWork;
 
-    public CancelClientAppointmentHandler(IClientAppointmentRepository appointments, ICurrentUserService currentUser, IUnitOfWork unitOfWork)
+    public CancelClientAppointmentHandler(IClientAppointmentRepository appointments, IAppointmentActivityRepository appointmentActivities, ICurrentUserService currentUser, IUnitOfWork unitOfWork)
     {
         _appointments = appointments;
+        _appointmentActivities = appointmentActivities;
         _currentUser = currentUser;
         _unitOfWork = unitOfWork;
     }
@@ -26,6 +31,11 @@ public sealed class CancelClientAppointmentHandler : IRequestHandler<CancelClien
             throw new ClientAppointmentCannotBeCancelledException();
 
         appointment.Cancel();
+        _appointmentActivities.Add(new AppointmentActivity(
+            appointment.Id,
+            AppointmentActivityType.Cancelled,
+            _currentUser.ProfileId,
+            _currentUser.RoleId));
         await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

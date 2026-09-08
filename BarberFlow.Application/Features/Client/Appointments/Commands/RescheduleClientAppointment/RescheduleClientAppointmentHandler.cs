@@ -2,6 +2,7 @@ using BarberFlow.Application.Common.Interfaces;
 using BarberFlow.Application.Common.Time;
 using BarberFlow.Application.Features.Client.Appointments;
 using BarberFlow.Domain.Entities;
+using BarberFlow.Domain.Enums;
 using BarberFlow.Domain.Interfaces;
 using BarberFlow.Domain.Interfaces.Repositories;
 using MediatR;
@@ -12,16 +13,18 @@ public sealed class RescheduleClientAppointmentHandler : IRequestHandler<Resched
 {
     private readonly IClientAppointmentRepository _clientAppointments;
     private readonly IAppointmentRepository _appointments;
+    private readonly IAppointmentActivityRepository _appointmentActivities;
     private readonly IBranchRepository _branches;
     private readonly IServiceRepository _services;
     private readonly ICollaboratorRepository _collaborators;
     private readonly ICurrentUserService _currentUser;
     private readonly IUnitOfWork _unitOfWork;
 
-    public RescheduleClientAppointmentHandler(IClientAppointmentRepository clientAppointments, IAppointmentRepository appointments, IBranchRepository branches, IServiceRepository services, ICollaboratorRepository collaborators, ICurrentUserService currentUser, IUnitOfWork unitOfWork)
+    public RescheduleClientAppointmentHandler(IClientAppointmentRepository clientAppointments, IAppointmentRepository appointments, IAppointmentActivityRepository appointmentActivities, IBranchRepository branches, IServiceRepository services, ICollaboratorRepository collaborators, ICurrentUserService currentUser, IUnitOfWork unitOfWork)
     {
         _clientAppointments = clientAppointments;
         _appointments = appointments;
+        _appointmentActivities = appointmentActivities;
         _branches = branches;
         _services = services;
         _collaborators = collaborators;
@@ -67,6 +70,21 @@ public sealed class RescheduleClientAppointmentHandler : IRequestHandler<Resched
         replacement.AddServices(services, services.ToDictionary(service => service.Id, service => service.Price));
         original.RescheduleTo(replacement.Id);
         _appointments.Add(replacement);
+        _appointmentActivities.Add(new AppointmentActivity(
+            original.Id,
+            AppointmentActivityType.Rescheduled,
+            _currentUser.ProfileId,
+            _currentUser.RoleId,
+            previousStartAtUtc: original.StartDateTime,
+            newStartAtUtc: replacement.StartDateTime,
+            relatedAppointmentId: replacement.Id));
+        _appointmentActivities.Add(new AppointmentActivity(
+            replacement.Id,
+            AppointmentActivityType.Created,
+            _currentUser.ProfileId,
+            _currentUser.RoleId,
+            newStartAtUtc: replacement.StartDateTime,
+            relatedAppointmentId: original.Id));
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return replacement.Id;
     }

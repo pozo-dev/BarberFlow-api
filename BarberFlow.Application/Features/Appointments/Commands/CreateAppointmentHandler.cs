@@ -4,6 +4,7 @@ using BarberFlow.Application.Features.Appointments.DTOs;
 using BarberFlow.Application.Features.Appointments.Exceptions;
 using BarberFlow.Application.Features.Services.Exceptions;
 using BarberFlow.Domain.Entities;
+using BarberFlow.Domain.Enums;
 using BarberFlow.Domain.Interfaces;
 using BarberFlow.Domain.Interfaces.Repositories;
 using MediatR;
@@ -12,6 +13,7 @@ namespace BarberFlow.Application.Features.Appointments.Commands;
 public class CreateAppointmentHandler : IRequestHandler<CreateAppointmentCommand, AppointmentDto>
 {
     private readonly IAppointmentRepository _appointments;
+    private readonly IAppointmentActivityRepository _appointmentActivities;
     private readonly IUserRepository _users;
     private readonly IBranchRepository _branches;
     private readonly ICollaboratorRepository _collaborators;
@@ -19,9 +21,10 @@ public class CreateAppointmentHandler : IRequestHandler<CreateAppointmentCommand
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUser;
 
-    public CreateAppointmentHandler(IAppointmentRepository appointments, IUserRepository users, IBranchRepository branches, ICollaboratorRepository collaborators, IServiceRepository services, IUnitOfWork unitOfWork, ICurrentUserService currentUser)
+    public CreateAppointmentHandler(IAppointmentRepository appointments, IAppointmentActivityRepository appointmentActivities, IUserRepository users, IBranchRepository branches, ICollaboratorRepository collaborators, IServiceRepository services, IUnitOfWork unitOfWork, ICurrentUserService currentUser)
     {
         _appointments = appointments;
+        _appointmentActivities = appointmentActivities;
         _users = users;
         _branches = branches;
         _collaborators = collaborators;
@@ -79,6 +82,12 @@ public class CreateAppointmentHandler : IRequestHandler<CreateAppointmentCommand
         var appointment = new Appointment(user.Id, branch.Id, professionalId, input.StartDateTime, end);
         appointment.AddServices(services, services.ToDictionary(x => x.Id, x => x.Price));
         _appointments.Add(appointment);
+        _appointmentActivities.Add(new AppointmentActivity(
+            appointment.Id,
+            AppointmentActivityType.Created,
+            _currentUser.ProfileId,
+            _currentUser.RoleId,
+            newStartAtUtc: appointment.StartDateTime));
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new AppointmentDto { Id = appointment.Id, BranchId = branch.Id, ProfessionalId = professionalId, UserId = user.Id, StartDateTime = appointment.StartDateTime, EndDateTime = appointment.EndDateTime, Status = appointment.Status, ServiceIds = serviceIds, CreatedAt = appointment.CreatedAt };

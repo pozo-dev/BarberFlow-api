@@ -57,5 +57,11 @@ public class AppointmentConfiguration
             .WithOne(x => x.Appointment)
             .HasForeignKey(x => x.AppointmentId)
             .OnDelete(DeleteBehavior.NoAction);
+
+        builder
+            .HasMany(x => x.Activities)
+            .WithOne(x => x.Appointment)
+            .HasForeignKey(x => x.AppointmentId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }

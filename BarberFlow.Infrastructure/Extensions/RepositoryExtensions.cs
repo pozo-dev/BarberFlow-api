@@ -26,6 +26,7 @@ public static class RepositoryExtensions
         services.AddScoped<IServiceRepository, ServiceRepository>();
         services.AddScoped<IServicePriceRepository, ServicePriceRepository>();
         services.AddScoped<IAppointmentRepository, AppointmentRepository>();
+        services.AddScoped<IAppointmentActivityRepository, AppointmentActivityRepository>();
         services.AddScoped<IClientAppointmentRepository, ClientAppointmentRepository>();
         services.AddScoped<IOwnerAppointmentRepository, OwnerAppointmentRepository>();
         services.AddScoped<IBarberAppointmentRepository, BarberAppointmentRepository>();

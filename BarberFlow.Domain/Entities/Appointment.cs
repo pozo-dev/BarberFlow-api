@@ -16,10 +16,12 @@ public class Appointment
     public Branch Branch { get; private set; } = null!;
     public Collaborator Collaborator { get; private set; } = null!;
     public ICollection<AppointmentService> AppointmentServices { get; private set; }
+    public ICollection<AppointmentActivity> Activities { get; private set; }
 
     private Appointment()
     {
         AppointmentServices = new List<AppointmentService>();
+        Activities = new List<AppointmentActivity>();
     }
 
     public Appointment(Guid userId, Guid branchId, Guid collaboratorId, DateTimeOffset start, DateTimeOffset end)
@@ -33,6 +35,7 @@ public class Appointment
         Status = AppointmentStatus.Scheduled;
         CreatedAt = DateTimeOffset.UtcNow;
         AppointmentServices = new List<AppointmentService>();
+        Activities = new List<AppointmentActivity>();
     }
 
     public void Completed() => Status = AppointmentStatus.Completed;

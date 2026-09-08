@@ -1,6 +1,7 @@
 using BarberFlow.Application.Common.Exceptions;
 using BarberFlow.Application.Common.Interfaces;
 using BarberFlow.Domain.Constants;
+using BarberFlow.Domain.Entities;
 using BarberFlow.Domain.Enums;
 using BarberFlow.Domain.Interfaces;
 using BarberFlow.Domain.Interfaces.Repositories;
@@ -13,10 +14,11 @@ public sealed class UpdateBarberAppointmentStatusHandler : IRequestHandler<Updat
     private readonly ICurrentUserService _currentUser;
     private readonly IUserProfileRepository _profiles;
     private readonly IBarberAppointmentRepository _appointments;
+    private readonly IAppointmentActivityRepository _appointmentActivities;
     private readonly IUnitOfWork _unitOfWork;
 
-    public UpdateBarberAppointmentStatusHandler(ICurrentUserService currentUser, IUserProfileRepository profiles, IBarberAppointmentRepository appointments, IUnitOfWork unitOfWork) =>
-        (_currentUser, _profiles, _appointments, _unitOfWork) = (currentUser, profiles, appointments, unitOfWork);
+    public UpdateBarberAppointmentStatusHandler(ICurrentUserService currentUser, IUserProfileRepository profiles, IBarberAppointmentRepository appointments, IAppointmentActivityRepository appointmentActivities, IUnitOfWork unitOfWork) =>
+        (_currentUser, _profiles, _appointments, _appointmentActivities, _unitOfWork) = (currentUser, profiles, appointments, appointmentActivities, unitOfWork);
 
     public async Task Handle(UpdateBarberAppointmentStatusCommand request, CancellationToken cancellationToken)
     {
@@ -37,6 +39,13 @@ public sealed class UpdateBarberAppointmentStatusHandler : IRequestHandler<Updat
 
         if (request.Action == BarberAppointmentAction.Complete) appointment.Completed();
         else appointment.NoShow();
+        _appointmentActivities.Add(new AppointmentActivity(
+            appointment.Id,
+            request.Action == BarberAppointmentAction.Complete
+                ? AppointmentActivityType.Completed
+                : AppointmentActivityType.NoShow,
+            _currentUser.ProfileId,
+            _currentUser.RoleId));
         await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

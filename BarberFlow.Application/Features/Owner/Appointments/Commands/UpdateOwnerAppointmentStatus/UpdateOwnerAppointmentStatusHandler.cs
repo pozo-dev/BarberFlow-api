@@ -1,6 +1,7 @@
 using BarberFlow.Application.Common.Exceptions;
 using BarberFlow.Application.Common.Interfaces;
 using BarberFlow.Domain.Enums;
+using BarberFlow.Domain.Entities;
 using BarberFlow.Domain.Interfaces;
 using BarberFlow.Domain.Interfaces.Repositories;
 using MediatR;
@@ -9,8 +10,8 @@ namespace BarberFlow.Application.Features.Owner.Appointments.Commands.UpdateOwne
 
 public sealed class UpdateOwnerAppointmentStatusHandler : IRequestHandler<UpdateOwnerAppointmentStatusCommand>
 {
-    private readonly ICurrentUserService _currentUser; private readonly IUserProfileRepository _profiles; private readonly IOwnerAppointmentRepository _appointments; private readonly IUnitOfWork _unitOfWork;
-    public UpdateOwnerAppointmentStatusHandler(ICurrentUserService currentUser, IUserProfileRepository profiles, IOwnerAppointmentRepository appointments, IUnitOfWork unitOfWork) => (_currentUser, _profiles, _appointments, _unitOfWork) = (currentUser, profiles, appointments, unitOfWork);
+    private readonly ICurrentUserService _currentUser; private readonly IUserProfileRepository _profiles; private readonly IOwnerAppointmentRepository _appointments; private readonly IAppointmentActivityRepository _appointmentActivities; private readonly IUnitOfWork _unitOfWork;
+    public UpdateOwnerAppointmentStatusHandler(ICurrentUserService currentUser, IUserProfileRepository profiles, IOwnerAppointmentRepository appointments, IAppointmentActivityRepository appointmentActivities, IUnitOfWork unitOfWork) => (_currentUser, _profiles, _appointments, _appointmentActivities, _unitOfWork) = (currentUser, profiles, appointments, appointmentActivities, unitOfWork);
     public async Task Handle(UpdateOwnerAppointmentStatusCommand request, CancellationToken ct)
     {
         if (_currentUser.ProfileId == Guid.Empty) throw new CurrentProfileUnavailableException();
@@ -19,6 +20,7 @@ public sealed class UpdateOwnerAppointmentStatusHandler : IRequestHandler<Update
         if (appointment.Status != AppointmentStatus.Scheduled || appointment.StartDateTime > DateTimeOffset.UtcNow) throw new OwnerAppointmentCannotBeUpdatedException();
         if (request.Action == OwnerAppointmentAction.NoShow && appointment.StartDateTime.AddMinutes(15) > DateTimeOffset.UtcNow) throw new OwnerAppointmentCannotBeUpdatedException();
         if (request.Action == OwnerAppointmentAction.Complete) appointment.Completed(); else appointment.NoShow();
+        _appointmentActivities.Add(new AppointmentActivity(appointment.Id, request.Action == OwnerAppointmentAction.Complete ? AppointmentActivityType.Completed : AppointmentActivityType.NoShow, _currentUser.ProfileId, _currentUser.RoleId));
         await _unitOfWork.SaveChangesAsync(ct);
     }
 }

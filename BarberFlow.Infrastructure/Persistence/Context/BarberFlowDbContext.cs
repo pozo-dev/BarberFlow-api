@@ -13,6 +13,7 @@ public class BarberFlowDbContext : DbContext
     public DbSet<Service> Services { get; set; }
     public DbSet<ServicePrice> ServicePrices { get; set; }
     public DbSet<Appointment> Appointments { get; set; }
+    public DbSet<AppointmentActivity> AppointmentActivities { get; set; }
     public DbSet<AppointmentService> AppointmentServices { get; set; }
     public DbSet<OtpCode> OtpCodes { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }

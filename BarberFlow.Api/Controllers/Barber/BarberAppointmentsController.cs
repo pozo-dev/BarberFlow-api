@@ -1,5 +1,7 @@
 using BarberFlow.Application.Features.Barber.Appointments.Commands.UpdateBarberAppointmentStatus;
 using BarberFlow.Application.Features.Barber.Appointments.Queries.GetBarberAppointments;
+using BarberFlow.Application.Features.Barber.Appointments.Queries.GetBarberAppointmentHistory;
+using BarberFlow.Application.Features.Appointments.History;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,6 +23,12 @@ public sealed class BarberAppointmentsController : ControllerBase
         [FromQuery] DateOnly to,
         CancellationToken cancellationToken) =>
         Ok(await _mediator.Send(new GetBarberAppointmentsQuery(from, to), cancellationToken));
+
+    [HttpGet("{id:guid}/history")]
+    public async Task<ActionResult<IReadOnlyList<AppointmentActivityDto>>> GetHistory(
+        Guid id,
+        CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new GetBarberAppointmentHistoryQuery(id), cancellationToken));
 
     [HttpPatch("{id:guid}/complete")]
     public async Task<IActionResult> Complete(Guid id, CancellationToken cancellationToken)

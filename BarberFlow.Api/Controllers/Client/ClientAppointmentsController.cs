@@ -4,6 +4,8 @@ using BarberFlow.Application.Features.Client.Appointments.Commands.CancelClientA
 using BarberFlow.Application.Features.Client.Appointments.Commands.RescheduleClientAppointment;
 using BarberFlow.Application.Features.Client.Appointments.Queries.GetAppointmentAvailability;
 using BarberFlow.Application.Features.Client.Appointments.Queries.GetMyAppointments;
+using BarberFlow.Application.Features.Client.Appointments.Queries.GetClientAppointmentHistory;
+using BarberFlow.Application.Features.Appointments.History;
 using BarberFlow.Application.Features.Client.Appointments.Queries.GetAvailableProfessionals;
 using BarberFlow.Application.Features.Client.Appointments.Queries.GetBranchBookingData;
 using MediatR;
@@ -61,6 +63,12 @@ public sealed class ClientAppointmentsController : ControllerBase
         var appointment = appointments.SingleOrDefault(item => item.Id == id);
         return appointment is null ? NotFound() : Ok(appointment);
     }
+
+    [HttpGet("appointments/{id:guid}/history")]
+    public async Task<ActionResult<IReadOnlyList<AppointmentActivityDto>>> GetHistory(
+        Guid id,
+        CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new GetClientAppointmentHistoryQuery(id), cancellationToken));
 
     [HttpPost("appointments/{id:guid}/cancel")]
     public async Task<IActionResult> Cancel(Guid id, CancellationToken cancellationToken)
