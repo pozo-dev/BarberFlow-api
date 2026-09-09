@@ -40,7 +40,7 @@ profile's relationship to the collaborator.
 - `GET /api/barber/collaborators/{collaboratorId}/working-hours`
 - `POST /api/barber/collaborators/{collaboratorId}/working-hours/requests`
 - `DELETE /api/barber/collaborators/{collaboratorId}/working-hours/requests/{requestId}`
-- `GET /api/barber/collaborators/{collaboratorId}/time-off`
+- `GET /api/barber/collaborators/{collaboratorId}/time-off?year={year}&month={month}`
 - `POST /api/barber/collaborators/{collaboratorId}/time-off`
 - `DELETE /api/barber/collaborators/{collaboratorId}/time-off/{timeOffId}`
 
@@ -49,7 +49,7 @@ Types for time off: `1` absence, `2` vacation, `3` break. Vacations begin in
 
 ### Owner
 
-- `GET /api/owner/availability`
+- `GET /api/owner/availability?collaboratorId={collaboratorId}&year={year}&month={month}`
 - `POST /api/owner/collaborators/{collaboratorId}/working-hours/requests/{requestId}/approve`
 - `POST /api/owner/collaborators/{collaboratorId}/working-hours/requests/{requestId}/reject`
 - `POST /api/owner/collaborators/{collaboratorId}/time-off/{timeOffId}/approve`

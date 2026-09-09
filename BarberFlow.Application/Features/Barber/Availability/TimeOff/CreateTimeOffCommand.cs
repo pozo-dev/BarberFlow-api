@@ -20,6 +20,8 @@ public sealed class CreateTimeOffHandler(BarberAvailabilityAccess access, IColla
         var (_, branch) = await access.ResolveAsync(request.CollaboratorId, ct);
         if (request.EndDate < request.StartDate || request.EndDate == DateOnly.MaxValue)
             throw new ArgumentException("La fecha final no puede ser anterior a la inicial.");
+        if (request.Type == CollaboratorTimeOffType.Vacation && !request.AllDay)
+            throw new ArgumentException("Las vacaciones se registran por días completos.");
         var start = BranchTimeZone.ToUtc(request.StartDate, request.AllDay ? TimeOnly.MinValue : request.StartTime, branch.TimeZoneId);
         // All-day dates are inclusive for people and half-open UTC intervals for overlap checks.
         var end = BranchTimeZone.ToUtc(request.AllDay ? request.EndDate.AddDays(1) : request.EndDate,

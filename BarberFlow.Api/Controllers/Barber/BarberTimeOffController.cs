@@ -12,8 +12,12 @@ namespace BarberFlow.Api.Controllers.Barber;
 public sealed class BarberTimeOffController(IMediator mediator) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<TimeOffDto>>> Get(Guid collaboratorId, CancellationToken ct) =>
-        Ok(await mediator.Send(new GetTimeOffQuery(collaboratorId), ct));
+    public async Task<ActionResult<IReadOnlyList<TimeOffDto>>> Get(
+        Guid collaboratorId,
+        [FromQuery] int year,
+        [FromQuery] int month,
+        CancellationToken ct) =>
+        Ok(await mediator.Send(new GetTimeOffQuery(collaboratorId, year, month), ct));
 
     [HttpPost]
     public async Task<ActionResult<Guid>> Create(Guid collaboratorId, CreateTimeOffBody body, CancellationToken ct) =>

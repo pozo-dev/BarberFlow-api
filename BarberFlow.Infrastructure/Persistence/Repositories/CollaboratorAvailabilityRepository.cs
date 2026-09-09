@@ -25,6 +25,18 @@ public sealed class CollaboratorAvailabilityRepository(BarberFlowDbContext conte
             && x.EndAtUtc > DateTimeOffset.UtcNow)
             .OrderBy(x => x.StartAtUtc).ToListAsync(ct);
 
+    public Task<List<CollaboratorTimeOff>> GetTimeOffAsync(
+        Guid collaboratorId,
+        DateTimeOffset start,
+        DateTimeOffset end,
+        CancellationToken ct) =>
+        context.Set<CollaboratorTimeOff>().AsNoTracking()
+            .Where(x => x.CollaboratorId == collaboratorId)
+            .Where(x => x.Status != AvailabilityChangeStatus.Withdrawn)
+            .Where(x => x.StartAtUtc < end && x.EndAtUtc > start)
+            .OrderBy(x => x.StartAtUtc)
+            .ToListAsync(ct);
+
     public Task<List<CollaboratorTimeOff>> GetTimeOffAsync(IReadOnlyCollection<Guid> ids, DateTimeOffset start, DateTimeOffset end, CancellationToken ct) =>
         context.Set<CollaboratorTimeOff>().AsNoTracking()
             .Where(Matches<CollaboratorTimeOff>(ids, x => x.CollaboratorId))

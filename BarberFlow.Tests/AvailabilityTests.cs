@@ -196,6 +196,7 @@ public sealed class AvailabilityTests
         public Task<List<ProfessionalBusyInterval>> GetBusyIntervalsAsync(IReadOnlyCollection<Guid> ids, DateTimeOffset start, DateTimeOffset end, CancellationToken ct) => Task.FromResult(Booked);
         public Task<CollaboratorWorkingHours?> GetWorkingHoursAsync(Guid id, CancellationToken ct) => throw new NotSupportedException();
         public Task<List<CollaboratorTimeOff>> GetTimeOffAsync(Guid id, CancellationToken ct) => throw new NotSupportedException();
+        public Task<List<CollaboratorTimeOff>> GetTimeOffAsync(Guid id, DateTimeOffset start, DateTimeOffset end, CancellationToken ct) => throw new NotSupportedException();
         public Task<List<Appointment>> GetFutureAppointmentsAsync(Guid id, CancellationToken ct) => throw new NotSupportedException();
         public void Add(CollaboratorWorkingHours hours) => throw new NotSupportedException();
         public void ReplaceWorkingHours(CollaboratorWorkingHours current, bool useBranchHours, IEnumerable<CollaboratorWorkPeriod> periods) => throw new NotSupportedException();

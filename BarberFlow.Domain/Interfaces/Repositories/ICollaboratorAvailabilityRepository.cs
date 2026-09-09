@@ -7,6 +7,7 @@ public interface ICollaboratorAvailabilityRepository
     Task<CollaboratorWorkingHours?> GetWorkingHoursAsync(Guid collaboratorId, CancellationToken ct);
     Task<IReadOnlyDictionary<Guid, CollaboratorWorkingHours>> GetWorkingHoursAsync(IReadOnlyCollection<Guid> ids, CancellationToken ct);
     Task<List<CollaboratorTimeOff>> GetTimeOffAsync(Guid collaboratorId, CancellationToken ct);
+    Task<List<CollaboratorTimeOff>> GetTimeOffAsync(Guid collaboratorId, DateTimeOffset start, DateTimeOffset end, CancellationToken ct);
     Task<List<CollaboratorTimeOff>> GetTimeOffAsync(IReadOnlyCollection<Guid> ids, DateTimeOffset start, DateTimeOffset end, CancellationToken ct);
     Task<List<Appointment>> GetFutureAppointmentsAsync(Guid collaboratorId, CancellationToken ct);
     Task<List<ProfessionalBusyInterval>> GetBusyIntervalsAsync(IReadOnlyCollection<Guid> ids, DateTimeOffset start, DateTimeOffset end, CancellationToken ct);

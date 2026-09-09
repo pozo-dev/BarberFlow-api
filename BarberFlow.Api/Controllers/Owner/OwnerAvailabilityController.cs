@@ -11,8 +11,12 @@ namespace BarberFlow.Api.Controllers.Owner;
 public sealed class OwnerAvailabilityController(IMediator mediator) : ControllerBase
 {
     [HttpGet("availability")]
-    public async Task<ActionResult<OwnerAvailabilityDto>> Get(CancellationToken ct) =>
-        Ok(await mediator.Send(new GetOwnerAvailabilityQuery(), ct));
+    public async Task<ActionResult<OwnerAvailabilityDto>> Get(
+        [FromQuery] Guid collaboratorId,
+        [FromQuery] int year,
+        [FromQuery] int month,
+        CancellationToken ct) =>
+        Ok(await mediator.Send(new GetOwnerAvailabilityQuery(collaboratorId, year, month), ct));
 
     [HttpPost("collaborators/{collaboratorId:guid}/working-hours/requests/{requestId:guid}/approve")]
     public async Task<IActionResult> ApproveSchedule(
