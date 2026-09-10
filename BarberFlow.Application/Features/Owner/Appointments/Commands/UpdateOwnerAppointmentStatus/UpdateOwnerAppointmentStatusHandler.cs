@@ -17,8 +17,10 @@ public sealed class UpdateOwnerAppointmentStatusHandler : IRequestHandler<Update
         if (_currentUser.ProfileId == Guid.Empty) throw new CurrentProfileUnavailableException();
         var profile = await _profiles.GetByIdAsync(_currentUser.ProfileId, ct); if (profile?.BarberShopId is null) throw new ForbiddenAccessException();
         var appointment = await _appointments.GetOwnedByIdAsync(request.AppointmentId, profile.BarberShopId.Value, ct) ?? throw new OwnerAppointmentNotFoundException();
-        if (appointment.Status != AppointmentStatus.Scheduled || appointment.StartDateTime > DateTimeOffset.UtcNow) throw new OwnerAppointmentCannotBeUpdatedException();
-        if (request.Action == OwnerAppointmentAction.NoShow && appointment.StartDateTime.AddMinutes(15) > DateTimeOffset.UtcNow) throw new OwnerAppointmentCannotBeUpdatedException();
+        var now = DateTimeOffset.UtcNow;
+        if (appointment.Status != AppointmentStatus.Scheduled) throw new OwnerAppointmentCannotBeUpdatedException();
+        if (request.Action == OwnerAppointmentAction.Complete && appointment.EndDateTime > now) throw new OwnerAppointmentCannotBeUpdatedException();
+        if (request.Action == OwnerAppointmentAction.NoShow && appointment.StartDateTime.AddMinutes(15) > now) throw new OwnerAppointmentCannotBeUpdatedException();
         if (request.Action == OwnerAppointmentAction.Complete) appointment.Completed(); else appointment.NoShow();
         _appointmentActivities.Add(new AppointmentActivity(appointment.Id, request.Action == OwnerAppointmentAction.Complete ? AppointmentActivityType.Completed : AppointmentActivityType.NoShow, _currentUser.ProfileId, _currentUser.RoleId));
         await _unitOfWork.SaveChangesAsync(ct);
